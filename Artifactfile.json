@@ -1,0 +1,38 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
+  "title": "Install SQL Server and SSMS",
+  "description": "Installs SQL Server silently using a configuration file and installs SSMS silently. Idempotent and logs to C:\\Windows\\Temp\\dtl-artifact-logs.",
+  "publisher": "YourName",
+  "iconUri": "https://raw.githubusercontent.com/yourrepo/icons/sql.png",
+  "targetOsType": "Windows",
+  "parameters": {
+    "sqlInstallerUrl": {
+      "type": "string",
+      "displayName": "SQL Server Installer URL",
+      "defaultValue": "https://storageaccount.blob.core.windows.net/installers/sqlserver-installer.exe"
+    },
+    "sqlConfigUrl": {
+      "type": "string",
+      "displayName": "SQL Configuration File URL",
+      "defaultValue": "https://storageaccount.blob.core.windows.net/installers/ConfigurationFile.ini"
+    },
+    "sqlEdition": {
+      "type": "string",
+      "displayName": "SQL Edition",
+      "defaultValue": "Developer"
+    },
+    "ssmsInstallerUrl": {
+      "type": "string",
+      "displayName": "SSMS Installer URL",
+      "defaultValue": "https://aka.ms/ssmsfullsetup"
+    },
+    "rebootIfRequired": {
+      "type": "string",
+      "displayName": "Reboot If Required",
+      "defaultValue": "true"
+    }
+  },
+  "runCommand": {
+    "commandToExecute": "powershell -ExecutionPolicy Bypass -NoProfile -File install-sqlserver.ps1 -SqlInstallerUrl \"{{sqlInstallerUrl}}\" -SqlConfigUrl \"{{sqlConfigUrl}}\" -SqlEdition \"{{sqlEdition}}\" -RebootIfRequired \"{{rebootIfRequired}}\"; powershell -ExecutionPolicy Bypass -NoProfile -File install-ssms.ps1 -SsmsInstallerUrl \"{{ssmsInstallerUrl}}\""
+  }
+}
