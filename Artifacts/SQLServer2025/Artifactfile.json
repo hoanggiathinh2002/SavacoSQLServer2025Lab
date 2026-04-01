@@ -28,6 +28,6 @@
     }
   },
   "runCommand": {
-    "commandToExecute": "powershell -ExecutionPolicy Bypass -NoProfile -File install-sqlserver.ps1 -SqlInstallerUrl \"{{sqlInstallerUrl}}\" -SqlConfigUrl \"{{sqlConfigUrl}}\" -SqlEdition \"{{sqlEdition}}\" -RebootIfRequired \"{{rebootIfRequired}}\""
+  "commandToExecute": "powershell.exe -ExecutionPolicy Bypass -File install-sqlserver.ps1 -SqlInstallerUrl '[[parameters(\"sqlInstallerUrl\")]]' -SqlConfigUrl '[[parameters(\"sqlConfigUrl\")]]' -SqlEdition '[[parameters(\"sqlEdition\")]]' -RebootIfRequired '[[parameters(\"rebootIfRequired\")]]'"
   }
 }
