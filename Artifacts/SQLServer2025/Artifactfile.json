@@ -1,33 +1,29 @@
 {
   "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
-  "title": "Install SQL Server 2025 Devtest Lab",
-  "description": "Installs SQL Server silently using a configuration file. Idempotent and logs to C:\\Windows\\Temp\\dtl-artifact-logs.",
-  "publisher": "Thinh",
-  "iconUri": "https://raw.githubusercontent.com/yourrepo/icons/sql.png",
+  "title": "Install SQL Server 2025 Engine",
+  "publisher": "Custom",
+  "description": "Downloads and silently installs the SQL Server 2025 Database Engine. Supports .exe or .iso media.",
+  "tags": [
+    "SQL",
+    "SQL2025",
+    "Database",
+    "Server"
+  ],
+  "iconUri": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/Artifacts/windows-sql-server/icon.png",
   "targetOsType": "Windows",
   "parameters": {
-    "sqlInstallerUrl": {
+    "installerUrl": {
       "type": "string",
-      "displayName": "SQL Server Installer URL",
-      "defaultValue": "https://go.microsoft.com/fwlink/?linkid=2342429&clcid=0x409&culture=en-us&country=us"
+      "displayName": "SQL Server Media URL",
+      "description": "Direct download link or Azure Storage SAS URL to the SQL Server 2025 setup.exe or .iso file."
     },
-    "sqlConfigUrl": {
-      "type": "string",
-      "displayName": "SQL Configuration File URL",
-      "defaultValue": "https://storageaccount.blob.core.windows.net/installers/ConfigurationFile.ini"
-    },
-    "sqlEdition": {
-      "type": "string",
-      "displayName": "SQL Edition",
-      "defaultValue": "Developer"
-    },
-    "rebootIfRequired": {
-      "type": "string",
-      "displayName": "Reboot If Required",
-      "defaultValue": "true"
+    "saPassword": {
+      "type": "securestring",
+      "displayName": "SA Password",
+      "description": "Password for the SQL Server SA account. Must meet Windows password complexity requirements."
     }
   },
   "runCommand": {
-  "commandToExecute": "powershell.exe -ExecutionPolicy Bypass -File install-sqlserver.ps1 -SqlInstallerUrl '[[parameters(\"sqlInstallerUrl\")]]' -SqlConfigUrl '[[parameters(\"sqlConfigUrl\")]]' -SqlEdition '[[parameters(\"sqlEdition\")]]' -RebootIfRequired '[[parameters(\"rebootIfRequired\")]]'"
+    "commandToExecute": "powershell.exe -ExecutionPolicy bypass -File install-sql2025.ps1 -installerUrl '[parameters('installerUrl')]' -saPassword '[parameters('saPassword')]'"
   }
 }
