@@ -9,7 +9,7 @@
     "sqlInstallerUrl": {
       "type": "string",
       "displayName": "SQL Server Installer URL",
-      "defaultValue": "https://storageaccount.blob.core.windows.net/installers/sqlserver-installer.exe"
+      "defaultValue": "https://go.microsoft.com/fwlink/?linkid=2342429&clcid=0x409&culture=en-us&country=us"
     },
     "sqlConfigUrl": {
       "type": "string",
