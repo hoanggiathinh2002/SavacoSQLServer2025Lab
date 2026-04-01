@@ -1,76 +1,68 @@
-<#
-.SYNOPSIS
-  Wrapper to install SQL Server silently using a configuration file.
-.DESCRIPTION
-  Downloads installer and config, checks for existing installation, runs silent install, logs output.
-#>
-
 param(
-  [Parameter(Mandatory=$true)][string]$SqlInstallerUrl,
-  [Parameter(Mandatory=$true)][string]$SqlConfigUrl,
-  [Parameter(Mandatory=$false)][string]$SqlEdition = "Developer",
-  [Parameter(Mandatory=$false)][string]$RebootIfRequired = "true"
+    [Parameter(Mandatory=$true)]
+    [string]$installerUrl,
+
+    [Parameter(Mandatory=$true)]
+    [string]$saPassword
 )
 
 $ErrorActionPreference = "Stop"
-$logDir = "C:\Windows\Temp\dtl-artifact-logs"
-New-Item -Path $logDir -ItemType Directory -Force | Out-Null
-$logFile = Join-Path $logDir "install-sqlserver-$(Get-Date -Format yyyyMMdd-HHmmss).log"
+$downloadPath = "$env:TEMP\sql2025-install"
+New-Item -ItemType Directory -Force -Path $downloadPath | Out-Null
 
-function Log {
-  param([string]$msg)
-  $timestamp = (Get-Date).ToString("s")
-  "$timestamp`t$msg" | Out-File -FilePath $logFile -Append -Encoding utf8
+# Determine if the URL points to an ISO file (ignoring URL parameters like SAS tokens)
+$isIso = $installerUrl -match "\.iso(\?.*)?$"
+$localFile = if ($isIso) { "$downloadPath\sql2025.iso" } else { "$downloadPath\setup.exe" }
+
+Write-Host "Downloading SQL Server 2025 media from the provided URL..."
+# UseBasicParsing ensures compatibility with older PowerShell environments
+Invoke-WebRequest -Uri $installerUrl -OutFile $localFile -UseBasicParsing
+
+$setupExePath = $localFile
+
+if ($isIso) {
+    Write-Host "ISO file detected. Mounting image..."
+    $mountResult = Mount-DiskImage -ImagePath $localFile -PassThru
+    $driveLetter = ($mountResult | Get-Volume).DriveLetter
+    $setupExePath = "${driveLetter}:\setup.exe"
 }
 
-Log "Starting SQL Server artifact"
-try {
-  # Idempotency check: look for SQL Server instance or registry key
-  $sqlInstalled = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server' -ErrorAction SilentlyContinue
-  if ($sqlInstalled) {
-    Log "SQL Server appears already installed. Exiting successfully."
-    exit 0
-  }
+Write-Host "Starting silent installation of SQL Server 2025 Engine..."
 
-  # Download installer and config
-  $temp = New-Item -ItemType Directory -Path (Join-Path $env:TEMP "sqlinstall") -Force
-  $installerPath = Join-Path $temp "sqlserver-installer.exe"
-  $configPath = Join-Path $temp "ConfigurationFile.ini"
+# Standard silent install arguments for the SQL Server Engine
+# This installs the default instance (MSSQLSERVER) with Mixed Mode authentication
+$installArgs = @(
+    "/q",
+    "/ACTION=Install",
+    "/FEATURES=SQLEngine",
+    "/INSTANCENAME=MSSQLSERVER",
+    "/SQLSVCACCOUNT=`"NT AUTHORITY\System`"",
+    "/SQLSYSADMINACCOUNTS=`"BUILTIN\Administrators`"",
+    "/SECURITYMODE=SQL",
+    "/SAPWD=`"$saPassword`"",
+    "/IACCEPTSQLSERVERLICENSETERMS",
+    "/UpdateEnabled=0"
+)
 
-  Log "Downloading SQL installer from $SqlInstallerUrl"
-  Invoke-WebRequest -Uri $SqlInstallerUrl -OutFile $installerPath -UseBasicParsing
-  Log "Downloading SQL config from $SqlConfigUrl"
-  Invoke-WebRequest -Uri $SqlConfigUrl -OutFile $configPath -UseBasicParsing
+# Run the installer and wait for it to finish
+$process = Start-Process -FilePath $setupExePath -ArgumentList $installArgs -Wait -PassThru
 
-  # If your exported script used a different silent switch, adapt here.
-  $arguments = "/Q /IAcceptSQLServerLicenseTerms /ConfigurationFile=`"$configPath`""
-  Log "Running SQL Server installer: $installerPath $arguments"
-  $proc = Start-Process -FilePath $installerPath -ArgumentList $arguments -Wait -PassThru -NoNewWindow
-  Log "Installer exit code: $($proc.ExitCode)"
-
-  if ($proc.ExitCode -ne 0) {
-    Log "SQL Server installer failed with exit code $($proc.ExitCode)"
-    exit $proc.ExitCode
-  }
-
-  Log "SQL Server installed successfully."
-
-  # Optional: run post-install configuration from exported script (service accounts, firewall rules)
-  # Insert any exported script steps here, e.g. restore master keys, enable features, apply patches.
-
-  if ($RebootIfRequired -eq "true") {
-    # Detect pending reboot
-    $pending = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending" -ErrorAction SilentlyContinue)
-    if ($pending) {
-      Log "Reboot pending. Rebooting now."
-      Restart-Computer -Force
-    }
-  }
-
-  Log "SQL Server artifact completed successfully."
-  exit 0
+if ($isIso) {
+    Write-Host "Installation complete. Dismounting ISO..."
+    Dismount-DiskImage -ImagePath $localFile
 }
-catch {
-  Log "ERROR: $($_.Exception.Message)"
-  exit 1
+
+# Exit code 0 means success. 3010 means success, but requires reboot.
+if ($process.ExitCode -eq 0) {
+    Write-Host "SQL Server 2025 installed successfully."
+} elseif ($process.ExitCode -eq 3010) {
+    Write-Host "SQL Server 2025 installed successfully. A reboot is required."
+} else {
+    Write-Error "SQL Server installation failed with exit code $($process.ExitCode)."
+    exit $process.ExitCode
 }
+
+Write-Host "Cleaning up downloaded media..."
+Remove-Item -Path $downloadPath -Recurse -Force
+
+Write-Host "SQL Server 2025 Artifact execution completed successfully."
