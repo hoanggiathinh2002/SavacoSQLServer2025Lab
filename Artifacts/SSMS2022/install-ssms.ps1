@@ -1,55 +1,35 @@
-<#
-.SYNOPSIS
-  Wrapper to install SSMS silently.
-.DESCRIPTION
-  Downloads SSMS installer, checks for existing SSMS, runs silent install, logs output.
-#>
-
-param(
-  [Parameter(Mandatory=$true)][string]$SsmsInstallerUrl
-)
-
 $ErrorActionPreference = "Stop"
-$logDir = "C:\Windows\Temp\dtl-artifact-logs"
-New-Item -Path $logDir -ItemType Directory -Force | Out-Null
-$logFile = Join-Path $logDir "install-ssms-$(Get-Date -Format yyyyMMdd-HHmmss).log"
 
-function Log {
-  param([string]$msg)
-  $timestamp = (Get-Date).ToString("s")
-  "$timestamp`t$msg" | Out-File -FilePath $logFile -Append -Encoding utf8
+# Microsoft's permanent link for the latest SSMS full setup
+$ssmsDownloadUrl = "https://aka.ms/ssmsfullsetup"
+$installerPath = "$env:TEMP\SSMS-Setup-ENU.exe"
+
+Write-Host "Downloading latest SQL Server Management Studio from $ssmsDownloadUrl..."
+# UseBasicParsing is included for compatibility with older PowerShell environments
+Invoke-WebRequest -Uri $ssmsDownloadUrl -OutFile $installerPath -UseBasicParsing
+
+Write-Host "Download complete. Starting silent installation of SSMS..."
+
+# /Install: Installs the application
+# /Quiet: Runs the installer with no UI
+# /NoRestart: Suppresses any required reboots so the artifact doesn't hang the lab provisioning
+$installArgs = "/Install /Quiet /NoRestart"
+
+# Start the installer and wait for it to finish
+$process = Start-Process -FilePath $installerPath -ArgumentList $installArgs -Wait -PassThru
+
+# Exit code 0 means success. Exit code 3010 means success, but a reboot is required.
+if ($process.ExitCode -eq 0 -or $process.ExitCode -eq 3010) {
+    Write-Host "SSMS installed successfully. (Exit code: $($process.ExitCode))"
+    if ($process.ExitCode -eq 3010) {
+        Write-Host "Note: A reboot may be required on this VM to complete the SSMS setup."
+    }
+} else {
+    Write-Error "SSMS installation failed with exit code $($process.ExitCode)."
+    exit $process.ExitCode
 }
 
-Log "Starting SSMS artifact"
-try {
-  # Idempotency check: look for SSMS registry key or executable
-  $ssmsPath = "C:\Program Files (x86)\Microsoft SQL Server Management Studio 18\Common7\IDE\Ssms.exe"
-  if (Test-Path $ssmsPath) {
-    Log "SSMS already installed at $ssmsPath. Exiting successfully."
-    exit 0
-  }
+Write-Host "Cleaning up installer file..."
+Remove-Item -Path $installerPath -Force
 
-  $temp = New-Item -ItemType Directory -Path (Join-Path $env:TEMP "ssmsinstall") -Force
-  $installerPath = Join-Path $temp "ssms-setup.exe"
-
-  Log "Downloading SSMS installer from $SsmsInstallerUrl"
-  Invoke-WebRequest -Uri $SsmsInstallerUrl -OutFile $installerPath -UseBasicParsing
-
-  # SSMS silent install switches
-  $arguments = "/install /quiet /norestart"
-  Log "Running SSMS installer: $installerPath $arguments"
-  $proc = Start-Process -FilePath $installerPath -ArgumentList $arguments -Wait -PassThru -NoNewWindow
-  Log "Installer exit code: $($proc.ExitCode)"
-
-  if ($proc.ExitCode -ne 0) {
-    Log "SSMS installer failed with exit code $($proc.ExitCode)"
-    exit $proc.ExitCode
-  }
-
-  Log "SSMS installed successfully."
-  exit 0
-}
-catch {
-  Log "ERROR: $($_.Exception.Message)"
-  exit 1
-}
+Write-Host "SSMS Artifact execution completed successfully."
