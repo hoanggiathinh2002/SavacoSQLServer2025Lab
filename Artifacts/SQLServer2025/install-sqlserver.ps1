@@ -7,16 +7,32 @@ param(
 
 Write-Host "Starting SQL Server 2025 installation..."
 
-# Ensure Chocolatey is installed
-if (-not (Get-Command choco.exe -ErrorAction SilentlyContinue)) {
-    Write-Host "Chocolatey not found. Installing Chocolatey..."
-    Set-ExecutionPolicy Bypass -Scope Process -Force
-    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-} else {
-    Write-Host "Chocolatey already installed."
+# --- Detect pending reboot ---
+$pendingReboot = $false
+
+if (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending") {
+    $pendingReboot = $true
+}
+if (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired") {
+    $pendingReboot = $true
+}
+if (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\PendingFileRenameOperations") {
+    $pendingReboot = $true
 }
 
+if ($pendingReboot -and -not $IgnorePendingReboot) {
+    Write-Host "Pending reboot detected. Rebooting now..."
+    shutdown /r /t 5
+    exit 0
+}
+
+# --- Ensure Chocolatey exists ---
+if (-not (Get-Command choco.exe -ErrorAction SilentlyContinue)) {
+    Write-Error "Chocolatey is not installed. Install Chocolatey artifact must run first."
+    exit 1
+}
+
+# --- Build Chocolatey parameters ---
 $chocoParams = @()
 
 if ($IsoPath -and $IsoPath.Trim() -ne "") {
@@ -35,7 +51,6 @@ if ($SqlSetupParameters -and $SqlSetupParameters.Trim() -ne "") {
     $chocoParams += $SqlSetupParameters
 }
 
-# Build final parameter string (safe for DevTest Labs)
 if ($chocoParams.Count -gt 0) {
     $paramString = "--params='" + ($chocoParams -join ' ') + "'"
 } else {
@@ -44,6 +59,7 @@ if ($chocoParams.Count -gt 0) {
 
 Write-Host "Installing SQL Server 2025 with parameters: $paramString"
 
+# --- Install SQL Server ---
 choco install sql-server-2025 -y --no-progress $paramString
 
 if ($LASTEXITCODE -ne 0) {
@@ -52,3 +68,4 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "SQL Server 2025 installation completed successfully."
+exit 0
