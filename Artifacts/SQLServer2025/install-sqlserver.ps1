@@ -185,6 +185,27 @@ try
     Write-Host 'Ensuring Chocolatey is installed.'
     Ensure-Chocolatey -ChocoExePath "$choco"
 
+    $pendingReboot = $false
+
+    if (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired") {
+        $pendingReboot = $true
+    }
+    
+    if (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending") {
+        $pendingReboot = $true
+    }
+    
+    $pendingRename = (Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -ErrorAction SilentlyContinue).PendingFileRenameOperations
+    if ($pendingRename) {
+        $pendingReboot = $true
+    }
+    
+    if ($pendingReboot) {
+        Write-Host "A system reboot is pending. Restarting VM before installing SQL Server..."
+        Restart-Computer -Force
+        exit 3010
+    }
+
     Write-Host "Preparing to install Chocolatey packages: $Packages."
     Install-Packages -ChocoExePath "$choco" -Packages $Packages
 
