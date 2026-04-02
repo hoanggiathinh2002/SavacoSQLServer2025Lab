@@ -23,10 +23,17 @@ param(
 # PowerShell configurations
 #
 
+# NOTE: Because the $ErrorActionPreference is "Stop", this script will stop on first failure.
+#       This is necessary to ensure we capture errors inside the try-catch-finally block.
 $ErrorActionPreference = 'Stop'
+
+# Suppress progress bar output.
 $ProgressPreference = 'SilentlyContinue'
+
+# Ensure we force use of TLS 1.2 for all downloads.
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
+# Expected path of the choco.exe file.
 $choco = "$Env:ProgramData/chocolatey/choco.exe"
 
 ###################################################################################################
@@ -36,6 +43,8 @@ $choco = "$Env:ProgramData/chocolatey/choco.exe"
 
 trap
 {
+    # NOTE: This trap will handle all errors. There should be no need to use a catch below in this
+    #       script, unless you want to ignore a specific error.
     $message = $Error[0].Exception.Message
     if ($message)
     {
@@ -43,6 +52,11 @@ trap
     }
 
     Write-Host "`nThe artifact failed to apply.`n"
+
+    # IMPORTANT NOTE: Throwing a terminating error (using $ErrorActionPreference = "Stop") still
+    # returns exit code zero from the PowerShell script when using -File. The workaround is to
+    # NOT use -File when calling this script and leverage the try-catch-finally block and return
+    # a non-zero exit code from the catch block.
     exit -1
 }
 
@@ -58,13 +72,12 @@ function Ensure-Chocolatey
         [string] $ChocoExePath
     )
 
+    #Set static version of Chocolatey to 1.4.0, to not cause reboot w/ choco v2
     $env:chocolateyVersion = '1.4.0'
 
     if (-not (Test-Path "$ChocoExePath"))
     {
-        Set-ExecutionPolicy Bypass -Scope Process -Force; 
-        iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-
+        Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
         if ($LastExitCode -eq 3010)
         {
             Write-Host 'The recent changes indicate a reboot is necessary. Please reboot at your earliest convenience.'
@@ -98,11 +111,11 @@ function Install-Packages
         $checkSumFlags = ""
         if ($AllowEmptyChecksums)
         {
-            $checkSumFlags += " --allow-empty-checksums "
+            $checkSumFlags = $checkSumFlags + " --allow-empty-checksums "
         }
         if ($IgnoreChecksums)
         {
-            $checkSumFlags += " --ignore-checksums "
+            $checkSumFlags = $checkSumFlags + " --ignore-checksums "
         }
         $expression = "$ChocoExePath install -y -f --acceptlicense $checkSumFlags --no-progress --stoponfirstfailure $_"
         Invoke-ExpressionImpl -Expression $expression
@@ -116,13 +129,19 @@ function Invoke-ExpressionImpl
         $Expression
     )
 
+    # This call will normally not throw. So, when setting -ErrorVariable it causes it to throw.
+    # The variable $expError contains whatever is sent to stderr.
     iex $Expression -ErrorVariable expError
 
+    # This check allows us to capture cases where the command we execute exits with an error code.
+    # In that case, we do want to throw an exception with whatever is in stderr. Normally, when
+    # Invoke-Expression throws, the error will come the normal way (i.e. $Error) and pass via the
+    # catch below.
     if ($LastExitCode -or $expError)
     {
         if ($LastExitCode -eq 3010)
         {
-            # Expected reboot condition
+            # Expected condition. The recent changes indicate a reboot is necessary. Please reboot at your earliest convenience.
         }
         elseif ($expError[0])
         {
@@ -138,7 +157,8 @@ function Invoke-ExpressionImpl
 function Validate-Params
 {
     [CmdletBinding()]
-    param()
+    param(
+    )
 
     if ([string]::IsNullOrEmpty($Packages))
     {
@@ -167,27 +187,6 @@ try
 
     Write-Host "Preparing to install Chocolatey packages: $Packages."
     Install-Packages -ChocoExePath "$choco" -Packages $Packages
-
-    ###################################################################################################
-    #
-    # Install SQL Server 2025 Developer Edition from ISO
-    #
-
-    Write-Host "Starting SQL Server 2025 installation."
-
-    $isoPath = "c:\downloads\SQLServer2025-x64-ENU-Dev.iso"
-
-    if (-not (Test-Path $isoPath)) {
-        throw "SQL Server ISO not found at $isoPath"
-    }
-
-    $expression = "sql-server-2025 --params ""'/IsoPath:$isoPath'"""
-    Write-Host "Executing: $expression"
-    Invoke-ExpressionImpl -Expression $expression
-
-    Write-Host "SQL Server 2025 installation completed."
-
-    ###################################################################################################
 
     Write-Host "`nThe artifact was applied successfully.`n"
 }
