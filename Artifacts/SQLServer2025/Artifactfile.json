@@ -1,15 +1,17 @@
 {
-    "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
-    "title": "SQL Server 2025",
-    "publisher": "Thinh",
-    "description": "Installs Sql server using the Chocolatey package manager.",
-    "tags": [
-        "Windows",
-        "SQL Server"
-    ],
-    "iconUri": "",
-    "targetOsType": "Windows",
-    "runCommand": {
-        "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./install-sqlserver.ps1 -Packages ''', 'sql-server-2025', '''\"')]"
+  "title": "SQL Server 2025",
+  "description": "Installs SQL Server 2025 Developer Edition using Chocolatey.",
+  "publisher": "Savaco",
+  "rebootBehavior": "always",
+
+  "parameters": {
+    "packages": {
+      "type": "string",
+      "defaultValue": "sql-server-2025"
     }
+  },
+
+  "runCommand": {
+    "commandToExecute": "powershell.exe -ExecutionPolicy bypass -File install.ps1 -Packages \"[parameters('packages')]\""
+  }
 }
