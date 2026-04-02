@@ -12,12 +12,12 @@
       "description": "Local path to SQL Server 2025 ISO. If empty, Chocolatey downloads the ISO.",
       "defaultValue": ""
     },
-    "PID": {
+    "ProductKey": {
       "type": "string",
       "displayName": "Product Key (optional)",
-      "description": "Product key for licensed editions. Leave empty for Developer Edition.",
       "defaultValue": ""
     },
+
     "IgnorePendingReboot": {
       "type": "bool",
       "displayName": "Ignore Pending Reboot",
