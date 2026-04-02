@@ -1,68 +1,196 @@
+##################################################################################################
+#
+# Parameters to this script file.
+#
+
+[CmdletBinding()]
 param(
-    [Parameter(Mandatory=$true)]
-    [string]$installerUrl,
+    # Space-, comma- or semicolon-separated list of Chocolatey packages.
+    [string] $Packages,
 
-    [Parameter(Mandatory=$true)]
-    [string]$saPassword
+    # Boolean indicating if we should allow empty checksums. Default to true to match previous artifact functionality despite security
+    [bool] $AllowEmptyChecksums = $true,
+
+    # Boolean indicating if we should ignore checksums. Default to false for security
+    [bool] $IgnoreChecksums = $false,
+    
+    # Minimum PowerShell version required to execute this script.
+    [int] $PSVersionRequired = 3
 )
 
-$ErrorActionPreference = "Stop"
-$downloadPath = "$env:TEMP\sql2025-install"
-New-Item -ItemType Directory -Force -Path $downloadPath | Out-Null
+###################################################################################################
+#
+# PowerShell configurations
+#
 
-# Determine if the URL points to an ISO file (ignoring URL parameters like SAS tokens)
-$isIso = $installerUrl -match "\.iso(\?.*)?$"
-$localFile = if ($isIso) { "$downloadPath\sql2025.iso" } else { "$downloadPath\setup.exe" }
+# NOTE: Because the $ErrorActionPreference is "Stop", this script will stop on first failure.
+#       This is necessary to ensure we capture errors inside the try-catch-finally block.
+$ErrorActionPreference = 'Stop'
 
-Write-Host "Downloading SQL Server 2025 media from the provided URL..."
-# UseBasicParsing ensures compatibility with older PowerShell environments
-Invoke-WebRequest -Uri $installerUrl -OutFile $localFile -UseBasicParsing
+# Suppress progress bar output.
+$ProgressPreference = 'SilentlyContinue'
 
-$setupExePath = $localFile
+# Ensure we force use of TLS 1.2 for all downloads.
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-if ($isIso) {
-    Write-Host "ISO file detected. Mounting image..."
-    $mountResult = Mount-DiskImage -ImagePath $localFile -PassThru
-    $driveLetter = ($mountResult | Get-Volume).DriveLetter
-    $setupExePath = "${driveLetter}:\setup.exe"
+# Expected path of the choco.exe file.
+$choco = "$Env:ProgramData/chocolatey/choco.exe"
+
+###################################################################################################
+#
+# Handle all errors in this script.
+#
+
+trap
+{
+    # NOTE: This trap will handle all errors. There should be no need to use a catch below in this
+    #       script, unless you want to ignore a specific error.
+    $message = $Error[0].Exception.Message
+    if ($message)
+    {
+        Write-Host -Object "`nERROR: $message" -ForegroundColor Red
+    }
+
+    Write-Host "`nThe artifact failed to apply.`n"
+
+    # IMPORTANT NOTE: Throwing a terminating error (using $ErrorActionPreference = "Stop") still
+    # returns exit code zero from the PowerShell script when using -File. The workaround is to
+    # NOT use -File when calling this script and leverage the try-catch-finally block and return
+    # a non-zero exit code from the catch block.
+    exit -1
 }
 
-Write-Host "Starting silent installation of SQL Server 2025 Engine..."
+###################################################################################################
+#
+# Functions used in this script.
+#
 
-# Standard silent install arguments for the SQL Server Engine
-# This installs the default instance (MSSQLSERVER) with Mixed Mode authentication
-$installArgs = @(
-    "/q",
-    "/ACTION=Install",
-    "/FEATURES=SQLEngine",
-    "/INSTANCENAME=MSSQLSERVER",
-    "/SQLSVCACCOUNT=`"NT AUTHORITY\System`"",
-    "/SQLSYSADMINACCOUNTS=`"BUILTIN\Administrators`"",
-    "/SECURITYMODE=SQL",
-    "/SAPWD=`"$saPassword`"",
-    "/IACCEPTSQLSERVERLICENSETERMS",
-    "/UpdateEnabled=0"
-)
+function Ensure-Chocolatey
+{
+    [CmdletBinding()]
+    param(
+        [string] $ChocoExePath
+    )
 
-# Run the installer and wait for it to finish
-$process = Start-Process -FilePath $setupExePath -ArgumentList $installArgs -Wait -PassThru
+    #Set static version of Chocolatey to 1.4.0, to not cause reboot w/ choco v2
+    $env:chocolateyVersion = '1.4.0'
 
-if ($isIso) {
-    Write-Host "Installation complete. Dismounting ISO..."
-    Dismount-DiskImage -ImagePath $localFile
+    if (-not (Test-Path "$ChocoExePath"))
+    {
+        Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+        if ($LastExitCode -eq 3010)
+        {
+            Write-Host 'The recent changes indicate a reboot is necessary. Please reboot at your earliest convenience.'
+        }
+    }
 }
 
-# Exit code 0 means success. 3010 means success, but requires reboot.
-if ($process.ExitCode -eq 0) {
-    Write-Host "SQL Server 2025 installed successfully."
-} elseif ($process.ExitCode -eq 3010) {
-    Write-Host "SQL Server 2025 installed successfully. A reboot is required."
-} else {
-    Write-Error "SQL Server installation failed with exit code $($process.ExitCode)."
-    exit $process.ExitCode
+function Ensure-PowerShell
+{
+    [CmdletBinding()]
+    param(
+        [int] $Version
+    )
+
+    if ($PSVersionTable.PSVersion.Major -lt $Version)
+    {
+        throw "The current version of PowerShell is $($PSVersionTable.PSVersion.Major). Prior to running this artifact, ensure you have PowerShell $Version or higher installed."
+    }
 }
 
-Write-Host "Cleaning up downloaded media..."
-Remove-Item -Path $downloadPath -Recurse -Force
+function Install-Packages
+{
+    [CmdletBinding()]
+    param(
+        [string] $ChocoExePath,
+        $Packages
+    )
 
-Write-Host "SQL Server 2025 Artifact execution completed successfully."
+    $Packages = $Packages.split(',; ', [StringSplitOptions]::RemoveEmptyEntries)
+    $Packages | % {
+        $checkSumFlags = ""
+        if ($AllowEmptyChecksums)
+        {
+            $checkSumFlags = $checkSumFlags + " --allow-empty-checksums "
+        }
+        if ($IgnoreChecksums)
+        {
+            $checkSumFlags = $checkSumFlags + " --ignore-checksums "
+        }
+        $expression = "$ChocoExePath install -y -f --acceptlicense $checkSumFlags --no-progress --stoponfirstfailure $_"
+        Invoke-ExpressionImpl -Expression $expression
+    }
+}
+
+function Invoke-ExpressionImpl
+{
+    [CmdletBinding()]
+    param(
+        $Expression
+    )
+
+    # This call will normally not throw. So, when setting -ErrorVariable it causes it to throw.
+    # The variable $expError contains whatever is sent to stderr.
+    iex $Expression -ErrorVariable expError
+
+    # This check allows us to capture cases where the command we execute exits with an error code.
+    # In that case, we do want to throw an exception with whatever is in stderr. Normally, when
+    # Invoke-Expression throws, the error will come the normal way (i.e. $Error) and pass via the
+    # catch below.
+    if ($LastExitCode -or $expError)
+    {
+        if ($LastExitCode -eq 3010)
+        {
+            # Expected condition. The recent changes indicate a reboot is necessary. Please reboot at your earliest convenience.
+        }
+        elseif ($expError[0])
+        {
+            throw $expError[0]
+        }
+        else
+        {
+            throw "Installation failed ($LastExitCode). Please see the Chocolatey logs in %ALLUSERSPROFILE%\chocolatey\logs folder for details."
+        }
+    }
+}
+
+function Validate-Params
+{
+    [CmdletBinding()]
+    param(
+    )
+
+    if ([string]::IsNullOrEmpty($Packages))
+    {
+        throw 'Packages parameter is required.'
+    }
+}
+
+###################################################################################################
+#
+# Main execution block.
+#
+
+try
+{
+    pushd $PSScriptRoot
+
+    Write-Host 'Validating parameters.'
+    Validate-Params
+
+    Write-Host 'Configuring PowerShell session.'
+    Ensure-PowerShell -Version $PSVersionRequired
+    Enable-PSRemoting -Force -SkipNetworkProfileCheck | Out-Null
+
+    Write-Host 'Ensuring Chocolatey is installed.'
+    Ensure-Chocolatey -ChocoExePath "$choco"
+
+    Write-Host "Preparing to install Chocolatey packages: $Packages."
+    Install-Packages -ChocoExePath "$choco" -Packages $Packages
+
+    Write-Host "`nThe artifact was applied successfully.`n"
+}
+finally
+{
+    popd
+}
