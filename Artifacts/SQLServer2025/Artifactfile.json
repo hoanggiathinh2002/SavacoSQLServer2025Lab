@@ -1,33 +1,37 @@
 {
-  "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
-  "title": "Microsoft SQL Server 2025 Developer Edition",
-  "description": "Installs SQL Server 2025 Developer Edition using Chocolatey.",
-  "publisher": "Savaco",
-  "targetOsType": "Windows",
-  "rebootBehavior": "never",
-  "parameters": {
-    "IsoPath": {
-      "type": "string",
-      "displayName": "ISO Path (optional)",
-      "defaultValue": ""
+    "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
+    "title": "SQL Server 2025 Developer Edition",
+    "publisher": "Microsoft",
+    "description": "Installs Microsoft SQL Server 2025 Developer Edition using the Chocolatey package manager.",
+    "tags": [
+        "Windows",
+        "SQL Server",
+        "Database",
+        "SQL2025"
+    ],
+    "iconUri": "https://community.chocolatey.org/content/packageimages/sql-server-2025.png",
+    "targetOsType": "Windows",
+    "parameters": {
+        "IsoPath": {
+            "type": "string",
+            "displayName": "ISO Path (optional)",
+            "description": "Path to a local SQL Server 2025 ISO. If empty, Chocolatey downloads the ISO.",
+            "defaultValue": ""
+        },
+        "PID": {
+            "type": "string",
+            "displayName": "Product Key (optional)",
+            "description": "Product key for licensed editions. Leave empty for Developer Edition.",
+            "defaultValue": ""
+        },
+        "AdditionalParams": {
+            "type": "string",
+            "displayName": "Additional SQL Setup Parameters",
+            "description": "Optional SQL Server setup parameters passed directly to SQL setup.",
+            "defaultValue": ""
+        }
     },
-    "ProductKey": {
-      "type": "string",
-      "displayName": "Product Key (optional)",
-      "defaultValue": ""
-    },
-    "IgnorePendingReboot": {
-      "type": "bool",
-      "displayName": "Ignore Pending Reboot",
-      "defaultValue": false
-    },
-    "SqlSetupParameters": {
-      "type": "string",
-      "displayName": "Additional SQL Setup Parameters",
-      "defaultValue": ""
+    "runCommand": {
+        "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./install-choco-package.ps1 -Packages ''sql-server-2025 --params=\\''/IsoPath:', parameters('IsoPath'), ' /PID:', parameters('PID'), ' ', parameters('AdditionalParams'), '\\'''''\"')]"
     }
-  },
-  "runCommand": {
-    "commandToExecute": "powershell.exe -ExecutionPolicy bypass -File ./install-sqlserver.ps1"
-  }
 }
