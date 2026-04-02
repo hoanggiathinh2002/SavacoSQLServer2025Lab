@@ -199,11 +199,6 @@ try
     if ($pendingRename) {
         $pendingReboot = $true
     }
-    
-    if ($pendingReboot) {
-        Write-Host "A system reboot is pending. Restarting VM before installing SQL Server..."
-        Restart-Computer -Force
-    }
 
     Write-Host "Preparing to install Chocolatey packages: $Packages."
     Install-Packages -ChocoExePath "$choco" -Packages $Packages
