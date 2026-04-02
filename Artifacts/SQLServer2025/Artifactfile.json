@@ -1,15 +1,14 @@
 {
-  "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/Artifacts/Artifactfile.schema.json",
+  "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
   "title": "Microsoft SQL Server 2025 Developer Edition",
-  "description": "Installs SQL Server 2025 Developer Edition (17.0.1000.7) using Chocolatey.",
-  "publisher": "Thinh Hoang Gia",
-  "iconUri": "https://community.chocolatey.org/content/packageimages/sql-server-2025.png",
+  "description": "Installs SQL Server 2025 Developer Edition using Chocolatey.",
+  "publisher": "Savaco",
   "targetOsType": "Windows",
+  "rebootBehavior": "never",
   "parameters": {
     "IsoPath": {
       "type": "string",
       "displayName": "ISO Path (optional)",
-      "description": "Local path to SQL Server 2025 ISO. If empty, Chocolatey downloads the ISO.",
       "defaultValue": ""
     },
     "ProductKey": {
@@ -17,21 +16,18 @@
       "displayName": "Product Key (optional)",
       "defaultValue": ""
     },
-
     "IgnorePendingReboot": {
       "type": "bool",
       "displayName": "Ignore Pending Reboot",
-      "description": "Skip pending reboot check (may cause installation failure).",
       "defaultValue": false
     },
     "SqlSetupParameters": {
       "type": "string",
       "displayName": "Additional SQL Setup Parameters",
-      "description": "Extra parameters passed directly to SQL Server setup.",
       "defaultValue": ""
     }
   },
   "runCommand": {
-    "commandToExecute": "powershell.exe -ExecutionPolicy bypass -File install-sqlserver.ps1"
+    "commandToExecute": "powershell.exe -ExecutionPolicy bypass -File ./install-sqlserver.ps1"
   }
 }
