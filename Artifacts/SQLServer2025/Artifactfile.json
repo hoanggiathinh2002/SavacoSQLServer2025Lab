@@ -1,29 +1,15 @@
 {
-  "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
-  "title": "Install SQL Server 2025 Engine",
-  "publisher": "Custom",
-  "description": "Downloads and silently installs the SQL Server 2025 Database Engine. Supports .exe or .iso media.",
-  "tags": [
-    "SQL",
-    "SQL2025",
-    "Database",
-    "Server"
-  ],
-  "iconUri": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/Artifacts/windows-sql-server/icon.png",
-  "targetOsType": "Windows",
-  "parameters": {
-    "installerUrl": {
-      "type": "string",
-      "displayName": "SQL Server Media URL",
-      "description": "Direct download link or Azure Storage SAS URL to the SQL Server 2025 setup.exe or .iso file."
-    },
-    "saPassword": {
-      "type": "securestring",
-      "displayName": "SA Password",
-      "description": "Password for the SQL Server SA account. Must meet Windows password complexity requirements."
+    "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
+    "title": "SSMS",
+    "publisher": "Microsoft",
+    "description": "Installs Sql server management studio using the Chocolatey package manager.",
+    "tags": [
+        "Windows",
+        "SSMS"
+    ],
+    "iconUri": "https://community.chocolatey.org/content/packageimages/sql-server-management-studio.15.0.18386.0.png",
+    "targetOsType": "Windows",
+    "runCommand": {
+        "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./install-choco-package.ps1 -Packages ''', 'sql-server-management-studio', '''\"')]"
     }
-  },
-  "runCommand": {
-    "commandToExecute": "powershell.exe -ExecutionPolicy bypass -File install-sql2025.ps1 -installerUrl '[parameters('installerUrl')]' -saPassword '[parameters('saPassword')]'"
-  }
 }
