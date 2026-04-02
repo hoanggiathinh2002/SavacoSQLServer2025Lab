@@ -18,6 +18,6 @@
   },
 
   "runCommand": {
-    "commandToExecute": "powershell.exe -ExecutionPolicy bypass -File install.ps1 -Packages \"[parameters('packages')]\""
+    "commandToExecute": "powershell.exe -ExecutionPolicy bypass -File install-sqlserver.ps1 -Packages \"[parameters('packages')]\""
   }
 }
