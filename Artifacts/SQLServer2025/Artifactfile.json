@@ -10,6 +10,6 @@
     "iconUri": "",
     "targetOsType": "Windows",
     "runCommand": {
-        "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass -File install-sqlserver.ps1')]"
+        "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./install-sqlserver.ps1 -Packages ''', 'sql-server-2025', '''\"')]"
     }
 }
