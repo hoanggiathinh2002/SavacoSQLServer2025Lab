@@ -203,7 +203,6 @@ try
     if ($pendingReboot) {
         Write-Host "A system reboot is pending. Restarting VM before installing SQL Server..."
         Restart-Computer -Force
-        exit 3010
     }
 
     Write-Host "Preparing to install Chocolatey packages: $Packages."
