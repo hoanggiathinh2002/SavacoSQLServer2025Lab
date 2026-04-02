@@ -10,3 +10,15 @@
     "commandToExecute": "powershell.exe -ExecutionPolicy bypass -File ./prepare-node.ps1"
   }
 }
+
+{
+  "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
+  "title": "Install Chocolatey",
+  "description": "Installs Chocolatey package manager on Windows.",
+  "publisher": "Savaco",
+  "targetOsType": "Windows",
+  "rebootBehavior": "never",
+  "runCommand": {
+    "commandToExecute": "powershell.exe -ExecutionPolicy bypass -File ./install-choco.ps1"
+  }
+}
