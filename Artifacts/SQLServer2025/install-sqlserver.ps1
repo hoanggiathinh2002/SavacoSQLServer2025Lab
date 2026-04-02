@@ -37,32 +37,28 @@ function Ensure-Chocolatey {
     }
 }
 
-function Install-Packages {
+function Install-Packages
+{
     [CmdletBinding()]
     param(
         [string] $ChocoExePath,
-        [string] $PackagesList
+        $Packages
     )
 
-    $pkgs = $PackagesList.split(',; ', [StringSplitOptions]::RemoveEmptyEntries)
-    
-    foreach ($pkg in $pkgs) {
-        Write-Host "Starting installation of: $pkg"
-        
+    $Packages = $Packages.split(',; ', [StringSplitOptions]::RemoveEmptyEntries)
+    $Packages | % {
         $checkSumFlags = ""
-        if ($AllowEmptyChecksums) { $checkSumFlags += " --allow-empty-checksums" }
-        if ($IgnoreChecksums) { $checkSumFlags += " --ignore-checksums" }
+        if ($AllowEmptyChecksums) { $checkSumFlags += " --allow-empty-checksums " }
+        if ($IgnoreChecksums) { $checkSumFlags += " --ignore-checksums " }
 
-        # --ignore-reboots is CRITICAL. 
-        # It prevents Choco from returning 3010, which Azure often treats as a failure.
-        $expression = "& '$ChocoExePath' install $pkg -y -f --acceptlicense --no-progress --ignore-reboots $checkSumFlags --install-arguments='""/SkipRules=RebootRequiredCheck""'"
+        # --- THE KEY CHANGE IS HERE ---
+        # We pass /SkipRules to the SQL installer via Chocolatey's --params
+        $sqlParams = "--params ""'/SkipRules:RebootRequiredCheck'"""
         
-        Write-Debug "Executing: $expression"
-        Invoke-Expression -Command $expression
-
-        if ($LastExitCode -ne 0 -and $LastExitCode -ne 3010) {
-            throw "Package '$pkg' failed to install with Exit Code: $LastExitCode"
-        }
+        $expression = "$ChocoExePath install -y -f --acceptlicense $checkSumFlags --no-progress --stoponfirstfailure --ignore-reboots $sqlParams $_"
+        
+        Write-Host "Executing: $expression"
+        Invoke-ExpressionImpl -Expression $expression
     }
 }
 
