@@ -10,6 +10,6 @@
     "iconUri": "",
     "targetOsType": "Windows",
     "runCommand": {
-        "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"sql-server-2025 --params=''\\'\\/IsoPath:c:\\\\downloads\\\\SQLServer2025-x64-ENU-Dev.iso\\'''\"')]"
+        "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass -File install-sqlserver.ps1')]"
     }
 }
