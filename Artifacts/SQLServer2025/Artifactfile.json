@@ -3,7 +3,7 @@
   "title": "SQL Server 2025",
   "description": "Installs SQL Server 2025 Developer Edition using Chocolatey.",
   "publisher": "Savaco",
-  "rebootBehavior": "always",
+  "rebootBehavior": "ifRequired",
   "tags": [
         "Windows",
         "SQL Server"
