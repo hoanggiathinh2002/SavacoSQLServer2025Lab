@@ -55,7 +55,7 @@ function Install-Packages {
 
         # --ignore-reboots is CRITICAL. 
         # It prevents Choco from returning 3010, which Azure often treats as a failure.
-        $expression = "& '$ChocoExePath' install $pkg -y -f --acceptlicense --no-progress --ignore-reboots $checkSumFlags"
+        $expression = "& '$ChocoExePath' install $pkg -y -f --acceptlicense --no-progress --ignore-reboots $checkSumFlags --install-arguments='""/SkipRules=RebootRequiredCheck""'"
         
         Write-Debug "Executing: $expression"
         Invoke-Expression -Command $expression
