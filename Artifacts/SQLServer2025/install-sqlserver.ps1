@@ -1,6 +1,6 @@
 param(
     [string] $IsoPath,
-    [string] $PID,
+    [string] $ProductKey,
     [bool]   $IgnorePendingReboot,
     [string] $SqlSetupParameters
 )
@@ -13,8 +13,8 @@ if ($IsoPath -and $IsoPath.Trim() -ne "") {
     $chocoParams += "/IsoPath:$IsoPath"
 }
 
-if ($PID -and $PID.Trim() -ne "") {
-    $chocoParams += "/PID:$PID"
+if ($ProductKey -and $ProductKey.Trim() -ne "") {
+    $chocoParams += "/PID:$ProductKey"
 }
 
 if ($IgnorePendingReboot) {
