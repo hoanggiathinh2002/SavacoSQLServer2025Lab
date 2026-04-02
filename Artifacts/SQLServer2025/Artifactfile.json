@@ -10,14 +10,7 @@
     ],
   "iconUri": "",
   "targetOsType": "Windows",
-  "parameters": {
-    "packages": {
-      "type": "string",
-      "defaultValue": "sql-server-2025"
-    }
-  },
-
   "runCommand": {
-    "commandToExecute": "powershell.exe -ExecutionPolicy bypass -File install-sqlserver.ps1 -Packages \"[parameters('packages')]\""
+    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./install-sqlserver.ps1 -Packages ''', 'sql-server-2025', '''\"')]"
   }
 }
