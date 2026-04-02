@@ -1,211 +1,94 @@
-##################################################################################################
-#
-# Parameters to this script file.
-#
+<#
+.SYNOPSIS
+    Installs SQL Server 2025 via Chocolatey for Azure DevTest Labs.
+#>
 
 [CmdletBinding()]
 param(
-    # Space-, comma- or semicolon-separated list of Chocolatey packages.
-    [string] $Packages,
-
-    # Boolean indicating if we should allow empty checksums. Default to true to match previous artifact functionality despite security
+    [string] $Packages = "sql-server-2025",
     [bool] $AllowEmptyChecksums = $true,
-
-    # Boolean indicating if we should ignore checksums. Default to false for security
     [bool] $IgnoreChecksums = $false,
-    
-    # Minimum PowerShell version required to execute this script.
     [int] $PSVersionRequired = 3
 )
 
-###################################################################################################
-#
-# PowerShell configurations
-#
-
-# NOTE: Because the $ErrorActionPreference is "Stop", this script will stop on first failure.
-#       This is necessary to ensure we capture errors inside the try-catch-finally block.
 $ErrorActionPreference = 'Stop'
-
-# Suppress progress bar output.
 $ProgressPreference = 'SilentlyContinue'
 
-# Ensure we force use of TLS 1.2 for all downloads.
+# Force TLS 1.2 for Chocolatey Gallery downloads
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$choco = "$Env:ProgramData\chocolatey\bin\choco.exe"
 
-# Expected path of the choco.exe file.
-$choco = "$Env:ProgramData/chocolatey/choco.exe"
+################################################################################
+# Functions
+################################################################################
 
-###################################################################################################
-#
-# Handle all errors in this script.
-#
-
-trap
-{
-    # NOTE: This trap will handle all errors. There should be no need to use a catch below in this
-    #       script, unless you want to ignore a specific error.
-    $message = $Error[0].Exception.Message
-    if ($message)
-    {
-        Write-Host -Object "`nERROR: $message" -ForegroundColor Red
-    }
-
-    Write-Host "`nThe artifact failed to apply.`n"
-
-    # IMPORTANT NOTE: Throwing a terminating error (using $ErrorActionPreference = "Stop") still
-    # returns exit code zero from the PowerShell script when using -File. The workaround is to
-    # NOT use -File when calling this script and leverage the try-catch-finally block and return
-    # a non-zero exit code from the catch block.
-    exit -1
-}
-
-###################################################################################################
-#
-# Functions used in this script.
-#
-
-function Ensure-Chocolatey
-{
+function Ensure-Chocolatey {
     [CmdletBinding()]
-    param(
-        [string] $ChocoExePath
-    )
+    param([string] $ChocoExePath)
 
-    #Set static version of Chocolatey to 1.4.0, to not cause reboot w/ choco v2
+    # Pin to v1.4.0 to avoid breaking changes in v2.x during automation
     $env:chocolateyVersion = '1.4.0'
 
-    if (-not (Test-Path "$ChocoExePath"))
-    {
-        Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-        if ($LastExitCode -eq 3010)
-        {
-            Write-Host 'The recent changes indicate a reboot is necessary. Please reboot at your earliest convenience.'
-        }
+    if (-not (Test-Path "$ChocoExePath")) {
+        Write-Host "Chocolatey not found. Installing..."
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
     }
 }
 
-function Ensure-PowerShell
-{
-    [CmdletBinding()]
-    param(
-        [int] $Version
-    )
-
-    if ($PSVersionTable.PSVersion.Major -lt $Version)
-    {
-        throw "The current version of PowerShell is $($PSVersionTable.PSVersion.Major). Prior to running this artifact, ensure you have PowerShell $Version or higher installed."
-    }
-}
-
-function Install-Packages
-{
+function Install-Packages {
     [CmdletBinding()]
     param(
         [string] $ChocoExePath,
-        $Packages
+        [string] $PackagesList
     )
 
-    $Packages = $Packages.split(',; ', [StringSplitOptions]::RemoveEmptyEntries)
-    $Packages | % {
+    $pkgs = $PackagesList.split(',; ', [StringSplitOptions]::RemoveEmptyEntries)
+    
+    foreach ($pkg in $pkgs) {
+        Write-Host "Starting installation of: $pkg"
+        
         $checkSumFlags = ""
-        if ($AllowEmptyChecksums)
-        {
-            $checkSumFlags = $checkSumFlags + " --allow-empty-checksums "
-        }
-        if ($IgnoreChecksums)
-        {
-            $checkSumFlags = $checkSumFlags + " --ignore-checksums "
-        }
-        $expression = "$ChocoExePath install -y -f --acceptlicense $checkSumFlags --no-progress --stoponfirstfailure $_"
-        Invoke-ExpressionImpl -Expression $expression
-    }
-}
+        if ($AllowEmptyChecksums) { $checkSumFlags += " --allow-empty-checksums" }
+        if ($IgnoreChecksums) { $checkSumFlags += " --ignore-checksums" }
 
-function Invoke-ExpressionImpl
-{
-    [CmdletBinding()]
-    param(
-        $Expression
-    )
+        # --ignore-reboots is CRITICAL. 
+        # It prevents Choco from returning 3010, which Azure often treats as a failure.
+        $expression = "& '$ChocoExePath' install $pkg -y -f --acceptlicense --no-progress --ignore-reboots $checkSumFlags"
+        
+        Write-Debug "Executing: $expression"
+        Invoke-Expression -Command $expression
 
-    # This call will normally not throw. So, when setting -ErrorVariable it causes it to throw.
-    # The variable $expError contains whatever is sent to stderr.
-    iex $Expression -ErrorVariable expError
-
-    # This check allows us to capture cases where the command we execute exits with an error code.
-    # In that case, we do want to throw an exception with whatever is in stderr. Normally, when
-    # Invoke-Expression throws, the error will come the normal way (i.e. $Error) and pass via the
-    # catch below.
-    if ($LastExitCode -or $expError)
-    {
-        if ($LastExitCode -eq 3010)
-        {
-            # Expected condition. The recent changes indicate a reboot is necessary. Please reboot at your earliest convenience.
-        }
-        elseif ($expError[0])
-        {
-            throw $expError[0]
-        }
-        else
-        {
-            throw "Installation failed ($LastExitCode). Please see the Chocolatey logs in %ALLUSERSPROFILE%\chocolatey\logs folder for details."
+        if ($LastExitCode -ne 0 -and $LastExitCode -ne 3010) {
+            throw "Package '$pkg' failed to install with Exit Code: $LastExitCode"
         }
     }
 }
 
-function Validate-Params
-{
-    [CmdletBinding()]
-    param(
-    )
+################################################################################
+# Execution
+################################################################################
 
-    if ([string]::IsNullOrEmpty($Packages))
-    {
-        throw 'Packages parameter is required.'
+try {
+    Write-Host "--- Starting SQL Server Artifact Execution ---"
+    
+    if ($PSVersionTable.PSVersion.Major -lt $PSVersionRequired) {
+        throw "PowerShell $PSVersionRequired or higher is required."
     }
-}
 
-###################################################################################################
-#
-# Main execution block.
-#
-
-try
-{
-    pushd $PSScriptRoot
-
-    Write-Host 'Validating parameters.'
-    Validate-Params
-
-    Write-Host 'Configuring PowerShell session.'
-    Ensure-PowerShell -Version $PSVersionRequired
-    Enable-PSRemoting -Force -SkipNetworkProfileCheck | Out-Null
-
-    Write-Host 'Ensuring Chocolatey is installed.'
+    Write-Host "Step 1: Ensuring Chocolatey is present..."
     Ensure-Chocolatey -ChocoExePath "$choco"
 
-    $pendingReboot = $false
+    Write-Host "Step 2: Installing SQL Server 2025..."
+    # Note: We rely on the PREVIOUS artifact to have handled any pending reboots.
+    Install-Packages -ChocoExePath "$choco" -PackagesList $Packages
 
-    if (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired") {
-        $pendingReboot = $true
-    }
-    
-    if (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending") {
-        $pendingReboot = $true
-    }
-    
-    $pendingRename = (Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -ErrorAction SilentlyContinue).PendingFileRenameOperations
-    if ($pendingRename) {
-        $pendingReboot = $true
-    }
-
-    Write-Host "Preparing to install Chocolatey packages: $Packages."
-    Install-Packages -ChocoExePath "$choco" -Packages $Packages
-
-    Write-Host "`nThe artifact was applied successfully.`n"
+    Write-Host "--- Artifact Applied Successfully ---"
+    exit 0
 }
-finally
-{
-    popd
+catch {
+    Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "The artifact failed to apply."
+    exit -1
 }
