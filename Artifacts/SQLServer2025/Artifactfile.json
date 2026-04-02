@@ -1,15 +1,15 @@
 {
     "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
-    "title": "SSMS",
+    "title": "SQL Server 2025",
     "publisher": "Microsoft",
-    "description": "Installs Sql server management studio using the Chocolatey package manager.",
+    "description": "Installs Sql server using the Chocolatey package manager.",
     "tags": [
         "Windows",
-        "SSMS"
+        "SQL Server"
     ],
-    "iconUri": "https://community.chocolatey.org/content/packageimages/sql-server-management-studio.15.0.18386.0.png",
+    "iconUri": "",
     "targetOsType": "Windows",
     "runCommand": {
-        "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./install-choco-package.ps1 -Packages ''', 'sql-server-management-studio', '''\"')]"
+        "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"sql-server-2025 --params=''\\'/IsoPath:c:\\\\downloads\\\\SQLServer2025-x64-ENU-Dev.iso\\'''\"')]"
     }
 }
