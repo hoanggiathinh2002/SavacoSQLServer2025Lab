@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
+  "title": "1. Prepare SQL Node",
+  "description": "Ensures no pending reboots exist before SQL Install.",
+  "publisher": "Savaco",
+  "iconUri": "",
+  "targetOsType": "Windows",
+  "rebootBehavior": "always",
+  "runCommand": {
+    "commandToExecute": "powershell.exe -ExecutionPolicy bypass -File ./prepare-node.ps1"
+  }
+}
