@@ -25,10 +25,11 @@ if ($SqlSetupParameters -and $SqlSetupParameters.Trim() -ne "") {
     $chocoParams += $SqlSetupParameters
 }
 
-# Build final parameter string
-$paramString = ""
+# Build final parameter string (safe for DevTest Labs)
 if ($chocoParams.Count -gt 0) {
-    $paramString = "--params=\"'$( $chocoParams -join ' ' )'\""
+    $paramString = "--params='" + ($chocoParams -join ' ') + "'"
+} else {
+    $paramString = ""
 }
 
 Write-Host "Installing SQL Server 2025 with parameters: $paramString"
