@@ -9,7 +9,7 @@
         "Database",
         "SQL2025"
     ],
-    "iconUri": "https://community.chocolatey.org/content/packageimages/sql-server-2025.png",
+    "iconUri": "",
     "targetOsType": "Windows",
     "parameters": {
         "IsoPath": {
