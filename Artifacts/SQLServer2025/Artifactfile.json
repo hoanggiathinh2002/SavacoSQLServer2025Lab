@@ -11,27 +11,7 @@
     ],
     "iconUri": "",
     "targetOsType": "Windows",
-    "parameters": {
-        "IsoPath": {
-            "type": "string",
-            "displayName": "ISO Path (optional)",
-            "description": "Path to a local SQL Server 2025 ISO. If empty, Chocolatey downloads the ISO.",
-            "defaultValue": ""
-        },
-        "PID": {
-            "type": "string",
-            "displayName": "Product Key (optional)",
-            "description": "Product key for licensed editions. Leave empty for Developer Edition.",
-            "defaultValue": ""
-        },
-        "AdditionalParams": {
-            "type": "string",
-            "displayName": "Additional SQL Setup Parameters",
-            "description": "Optional SQL Server setup parameters passed directly to SQL setup.",
-            "defaultValue": ""
-        }
-    },
     "runCommand": {
-        "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./install-choco-package.ps1 -Packages ''sql-server-2025 --params=\\''/IsoPath:', parameters('IsoPath'), ' /PID:', parameters('PID'), ' ', parameters('AdditionalParams'), '\\'''''\"')]"
+        "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./install-choco-package.ps1 -Packages ''', 'sql-server-2025', '''\"')]"
     }
 }
