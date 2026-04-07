@@ -1,5 +1,5 @@
 # --- Configuration ---
-$baseRepoUrl = "https://raw.githubusercontent.com/YourUser/YourRepo/main/Lesson01" # Change this!
+$baseRepoUrl = "https://raw.githubusercontent.com/hoanggiathinh2002/SavacoSQLServer2025Lab/artifacts/sql-server-ssms/Lab01
 $labRoot = "C:\SQLServerAdminLabs\LabFiles\Lab01\Starter"
 $solutionFolder = Join-Path $labRoot "Solution"
 $projectFolder = Join-Path $solutionFolder "AWProject"
