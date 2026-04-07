@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Artifact script to grant NT AUTHORITY\SYSTEM sysadmin privileges in SQL Server 2022.
-    Designed for Azure DevTest Labs / Custom Script Extension.
+    Includes fixes for SQL 2022 SSL/Encryption connection errors.
 #>
 
 $ErrorActionPreference = "Stop"
@@ -13,10 +13,9 @@ $serviceName = "MSSQLSERVER"
 $service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
 
 if ($null -eq $service) {
-    # If default instance isn't found, try to find any SQL service (like SQLEXPRESS)
     $service = Get-Service -Name "MSSQL$*" | Select-Object -First 1
     if ($null -eq $service) {
-        Write-Error "SQL Server service not found on this machine."
+        Write-Error "SQL Server service not found."
         exit 1
     }
     $serviceName = $service.Name
@@ -28,12 +27,7 @@ if ($service.Status -ne 'Running') {
     Start-Sleep -Seconds 10
 }
 
-# 2. Determine the Server Instance name for connection
-# For default instances, this is "." or "localhost"
-$serverInstance = "."
-
-# 3. Define the T-SQL Command
-# This creates the login if it doesn't exist and adds it to sysadmin
+# 2. Define the T-SQL Command
 $tsql = @"
 IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = 'NT AUTHORITY\SYSTEM')
 BEGIN
@@ -42,13 +36,15 @@ END
 ALTER SERVER ROLE [sysadmin] ADD MEMBER [NT AUTHORITY\SYSTEM];
 "@
 
-# 4. Execute using sqlcmd
-Write-Host "Executing SQL command on $serverInstance..."
+# 3. Execute using sqlcmd with the Trust Certificate flag (-C)
+# -E: Trusted Connection
+# -S: Server (.)
+# -C: Trust Server Certificate (Fixes the SSL Provider error in SQL 2022)
+# -b: Exit on error
+Write-Host "Executing SQL command with Trust Certificate flag..."
 
 try {
-    # -E: Use Trusted Connection
-    # -b: On error, exit with a non-zero return code
-    & sqlcmd.exe -E -S "$serverInstance" -Q "$tsql" -b
+    & sqlcmd.exe -E -S "." -C -Q "$tsql" -b
     
     if ($LASTEXITCODE -ne 0) {
         throw "sqlcmd failed with exit code $LASTEXITCODE"
@@ -57,10 +53,10 @@ try {
     Write-Host "Successfully granted sysadmin rights to NT AUTHORITY\SYSTEM."
 }
 catch {
-    Write-Host "Standard execution failed. Attempting to use local pipe connection..."
-    # Fallback for some configurations: try explicitly using the local protocol
+    Write-Host "Standard execution failed. Attempting via local named pipes with -C flag..."
     try {
-        & sqlcmd.exe -E -S "np:\\.\pipe\sql\query" -Q "$tsql" -b
+        # Fallback to named pipes if TCP is blocked, still using -C
+        & sqlcmd.exe -E -S "np:\\.\pipe\sql\query" -C -Q "$tsql" -b
         Write-Host "Successfully granted sysadmin rights via named pipes."
     }
     catch {
