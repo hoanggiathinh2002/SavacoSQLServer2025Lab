@@ -1,0 +1,3 @@
+﻿Import-Module SQLServer -DisableNameChecking
+Set-location SQLServer:\SQL\MIA-SQL\Default\Databases
+Get-Childitem | Select Name, Size, SpaceAvailable, IndexSpaceUsage | Out-File 'C:\SQLServerAdminLabs\LabFiles\Lab01\Starter\Databases.txt'
