@@ -6,7 +6,7 @@
     "iconUri": "",
     "targetOsType": "Windows",
     "parameters": {
-      "<paramName>": {
+      "dbName": {
         "type": "string",
         "displayName": "Target Database Name",
         "defaultValue": "TrainingDB"
