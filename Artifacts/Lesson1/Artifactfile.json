@@ -9,7 +9,7 @@
       "<paramName>": {
         "type": "string",
         "displayName": "Target Database Name",
-        "description": "TrainingDB"
+        "defaultValue": "TrainingDB"
       }
     },
     "runCommand": {
