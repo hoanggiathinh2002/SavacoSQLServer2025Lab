@@ -9,4 +9,4 @@ $ServerInstance = "localhost"
 Invoke-Sqlcmd -ServerInstance $ServerInstance -Database "master" -Query "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '$DBName') CREATE DATABASE [$DBName];"
 Invoke-Sqlcmd -ServerInstance $ServerInstance -Database $DBName -InputFile "./Tables-Schema.sql"
 
-Write-Host "Milestone 1 successfully applied to $DBName"
+Write-Host "Lesson 1 successfully applied to $DBName"
