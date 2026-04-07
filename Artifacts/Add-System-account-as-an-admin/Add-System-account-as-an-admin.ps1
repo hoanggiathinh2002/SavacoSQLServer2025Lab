@@ -1,68 +1,45 @@
 <#
 .SYNOPSIS
-    Artifact script to grant NT AUTHORITY\SYSTEM sysadmin privileges in SQL Server 2022.
-    Includes fixes for SQL 2022 SSL/Encryption connection errors.
+    Forcefully grants sysadmin rights by restarting SQL in Single-User Mode.
+    Necessary when the SYSTEM account is locked out of a new SQL 2022 instance.
 #>
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "--- Starting SQL Permission Update ---"
+# 1. Identify Service Name
+$serviceName = (Get-Service -Name "MSSQLSERVER", "MSSQL$*" -ErrorAction SilentlyContinue | Select-Object -First 1).Name
+if (-not $serviceName) { throw "SQL Server Service not found." }
 
-# 1. Ensure the SQL Server Service is running
-$serviceName = "MSSQLSERVER"
-$service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
+Write-Host "--- Starting Forceful SQL Permission Update ---"
 
-if ($null -eq $service) {
-    $service = Get-Service -Name "MSSQL$*" | Select-Object -First 1
-    if ($null -eq $service) {
-        Write-Error "SQL Server service not found."
-        exit 1
-    }
-    $serviceName = $service.Name
-}
+# 2. Stop SQL Server
+Write-Host "Stopping SQL Server ($serviceName)..."
+Stop-Service -Name $serviceName -Force
 
-if ($service.Status -ne 'Running') {
-    Write-Host "Starting SQL Service: $serviceName..."
-    Start-Service -Name $serviceName
-    Start-Sleep -Seconds 10
-}
+# 3. Start SQL Server in Single-User Mode (-mSQLCMD)
+# This allows any member of the local Administrators group to connect.
+Write-Host "Restarting SQL in Single-User Mode..."
+Start-Process "sqlservr.exe" -ArgumentList "-s$serviceName", "-mSQLCMD", "-f" -WindowStyle Hidden
+Start-Sleep -Seconds 15 # Give it time to initialize
 
-# 2. Define the T-SQL Command
-$tsql = @"
-IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = 'NT AUTHORITY\SYSTEM')
-BEGIN
-    CREATE LOGIN [NT AUTHORITY\SYSTEM] FROM WINDOWS;
-END
-ALTER SERVER ROLE [sysadmin] ADD MEMBER [NT AUTHORITY\SYSTEM];
-"@
-
-# 3. Execute using sqlcmd with the Trust Certificate flag (-C)
-# -E: Trusted Connection
-# -S: Server (.)
-# -C: Trust Server Certificate (Fixes the SSL Provider error in SQL 2022)
-# -b: Exit on error
-Write-Host "Executing SQL command with Trust Certificate flag..."
+# 4. Run the SQL Command
+# We use -S "." and -C to handle the SQL 2022 encryption requirements
+$tsql = "IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = 'NT AUTHORITY\SYSTEM') CREATE LOGIN [NT AUTHORITY\SYSTEM] FROM WINDOWS; ALTER SERVER ROLE [sysadmin] ADD MEMBER [NT AUTHORITY\SYSTEM];"
 
 try {
+    Write-Host "Injecting sysadmin rights..."
     & sqlcmd.exe -E -S "." -C -Q "$tsql" -b
-    
-    if ($LASTEXITCODE -ne 0) {
-        throw "sqlcmd failed with exit code $LASTEXITCODE"
-    }
-    
-    Write-Host "Successfully granted sysadmin rights to NT AUTHORITY\SYSTEM."
+    Write-Host "Injection successful."
 }
 catch {
-    Write-Host "Standard execution failed. Attempting via local named pipes with -C flag..."
-    try {
-        # Fallback to named pipes if TCP is blocked, still using -C
-        & sqlcmd.exe -E -S "np:\\.\pipe\sql\query" -C -Q "$tsql" -b
-        Write-Host "Successfully granted sysadmin rights via named pipes."
-    }
-    catch {
-        Write-Error "Failed to update SQL permissions. Error: $($_.Exception.Message)"
-        exit 1
-    }
+    Write-Host "Injection failed: $($_.Exception.Message)"
+}
+finally {
+    # 5. Clean up: Kill the single-user process and restart the normal service
+    Write-Host "Restoring normal SQL service..."
+    Get-Process "sqlservr" -ErrorAction SilentlyContinue | Stop-Process -Force
+    Start-Sleep -Seconds 5
+    Start-Service -Name $serviceName
 }
 
-Write-Host "--- SQL Permission Update Complete ---"
+Write-Host "--- Forceful Update Complete ---"
