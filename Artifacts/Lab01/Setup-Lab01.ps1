@@ -10,7 +10,7 @@ $labRoot = "C:\SQLServerAdminLabs\LabFiles\Lab01"
 $solutionFolder = Join-Path $labRoot "Solution"
 $projectFolder = Join-Path $solutionFolder "AWProject"
 $starterFolder = Join-Path $labRoot "Starter"
-$setupFilesFolder = Join-Path $starterFolder "Setupfiles"
+$setupFilesFolder = Join-Path $starterFolder "SetupFiles"
 
 # --- Create Directory Structure ---
 $folders = @($labRoot, $solutionFolder, $starterFolder, $projectFolder, $setupFilesFolder)
