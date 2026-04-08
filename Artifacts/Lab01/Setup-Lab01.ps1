@@ -3,10 +3,7 @@ param (
     [string]$installType = "Full Lesson"
 )
 
-# Clean the input: Remove extra quotes and leading/trailing spaces
-$installType = $installType.Replace('"', '').Trim()
-
-Write-Output "DEBUG: Received InstallType value: '$installType'"
+Write-Output "DEBUG: Received installType value: '$installType'"
 
 $baseRepoUrl = "https://raw.githubusercontent.com/hoanggiathinh2002/SavacoSQLServer2025Lab/artifacts/sql-server-ssms/Artifacts/Lab01"
 $labRoot = "C:\SQLServerAdminLabs\LabFiles\Lab01"
@@ -51,7 +48,7 @@ switch ($installType) {
         $filesToDownload = $setupFiles + $solutionFiles 
     }
     Default { 
-        Write-Error "Invalid InstallType specified: '$installType'"; exit 1
+        Write-Error "Invalid installType specified: '$installType'"; exit 1
     }
 }
 
@@ -71,7 +68,7 @@ $psFile = Join-Path $solutionFolder "GetDatabases.ps1"
 if (Test-Path $psTxtFile) { Rename-Item -Path $psTxtFile -NewName "GetDatabases.ps1" -Force }
 
 # --- Execute Environment Setup (Only if Setup files were downloaded) ---
-if ($InstallType -eq "Setup Only" -or $InstallType -eq "Full Lesson") {
+if ($installType -eq "Setup Only" -or $installType -eq "Full Lesson") {
     Set-Location $labRoot
     Write-Output "Running environment setup..."
     Start-Process -FilePath "cmd.exe" -ArgumentList "/c Setup.cmd" -Wait
