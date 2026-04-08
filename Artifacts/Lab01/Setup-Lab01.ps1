@@ -10,7 +10,7 @@ $labRoot = "C:\SQLServerAdminLabs\LabFiles\Lab01"
 $solutionFolder = Join-Path $labRoot "Solution"
 $projectFolder = Join-Path $solutionFolder "AWProject"
 $starterFolder = Join-Path $labRoot "Starter"
-$setupFilesFolder = Join-Path $starterFolder "SetupFiles"
+$setupFilesFolder = Join-Path $starterFolder "Setupfiles"
 
 # --- Create Directory Structure ---
 $folders = @($labRoot, $solutionFolder, $starterFolder, $projectFolder, $setupFilesFolder)
@@ -26,7 +26,7 @@ $filesToDownload = @{}
 # Update your file groups to include the relative GitHub path
 $setupFiles = @{
     "Setup.cmd" = @{ Local = $starterFolder; Remote = "Starter" }
-    "Setup.sql" = @{ Local = $setupFilesFolder; Remote = "Starter/SetupFiles" }
+    "Setup.sql" = @{ Local = $setupFilesFolder; Remote = "Starter/Setupfiles" }
 }
 
 $solutionFiles = @{
