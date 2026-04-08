@@ -26,7 +26,7 @@ $filesToDownload = @{}
 # Update your file groups to include the relative GitHub path
 $setupFiles = @{
     "Setup.cmd" = @{ Local = $starterFolder; Remote = "Starter" }
-    "Setup.sql" = @{ Local = $setupFilesFolder; Remote = "SetupFiles" }
+    "Setup.sql" = @{ Local = $setupFilesFolder; Remote = "Starter/SetupFiles" }
 }
 
 $solutionFiles = @{
