@@ -1,12 +1,12 @@
 param (
     [Parameter(Mandatory = $false)]
-    [string]$InstallType = "Full Lesson"
+    [string]$installType = "Full Lesson"
 )
 
 # Clean the input: Remove extra quotes and leading/trailing spaces
-$InstallType = $InstallType.Replace('"', '').Trim()
+$installType = $installType.Replace('"', '').Trim()
 
-Write-Output "DEBUG: Received InstallType value: '$InstallType'"
+Write-Output "DEBUG: Received InstallType value: '$installType'"
 
 $baseRepoUrl = "https://raw.githubusercontent.com/hoanggiathinh2002/SavacoSQLServer2025Lab/artifacts/sql-server-ssms/Artifacts/Lab01"
 $labRoot = "C:\SQLServerAdminLabs\LabFiles\Lab01"
