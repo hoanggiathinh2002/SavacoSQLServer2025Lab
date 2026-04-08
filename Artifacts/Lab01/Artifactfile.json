@@ -20,6 +20,6 @@
     "Lab"
      ],
     "runCommand": {
-     "commandToExecute": "powershell.exe -ExecutionPolicy Bypass -File Setup-Lab01.ps1 -InstallType '[parameters('installType')]'"
+     "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File Setup-Lab01.ps1 -installType \"', parameters('installType'), '\"')]"
    }
   }
