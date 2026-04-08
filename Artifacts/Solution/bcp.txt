@@ -1,3 +1,0 @@
-bcp HumanResources.dbo.JobCandidate format nul -S MIA-SQL -T -w  -t \t -r \n -x -f C:\SQLServerAdminLabs\Labfiles\Lab06\Starter\JobCandidateFmt.xml
-
-bcp HumanResources.dbo.JobCandidate in C:\SQLServerAdminLabs\Labfiles\Lab06\Starter\JobCandidate.txt -S MIA-SQL -T -f C:\SQLServerAdminLabs\Labfiles\Lab06\Starter\JobCandidateFmt.xml
