@@ -40,7 +40,7 @@ $solutionFiles = @{
 # --- Determine what to download ---
 $filesToDownload = @{}
 
-switch ($InstallType) {
+switch ($installType) {
     "Setup Only" { 
         $filesToDownload = $setupFiles 
     }
@@ -51,7 +51,7 @@ switch ($InstallType) {
         $filesToDownload = $setupFiles + $solutionFiles 
     }
     Default { 
-        Write-Error "Invalid InstallType specified: '$InstallType'"; exit 1
+        Write-Error "Invalid InstallType specified: '$installType'"; exit 1
     }
 }
 
@@ -77,4 +77,4 @@ if ($InstallType -eq "Setup Only" -or $InstallType -eq "Full Lesson") {
     Start-Process -FilePath "cmd.exe" -ArgumentList "/c Setup.cmd" -Wait
 }
 
-Write-Output "Lesson 01 ($InstallType) Successfully Downloaded and Initialized."
+Write-Output "Lesson 01 ($installType) Successfully Downloaded and Initialized."
