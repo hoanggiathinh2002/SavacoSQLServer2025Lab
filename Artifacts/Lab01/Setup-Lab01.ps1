@@ -20,22 +20,22 @@ foreach ($folder in $folders) {
     }
 }
 
-# --- Define File Groups ---
+# --- Determine what to download ---
+$filesToDownload = @{}
+
+# Update your file groups to include the relative GitHub path
 $setupFiles = @{
-    "Setup.cmd" = $starterFolder
-    "Setup.sql" = $setupFilesFolder
+    "Setup.cmd" = @{ Local = $starterFolder; Remote = "" }
+    "Setup.sql" = @{ Local = $setupFilesFolder; Remote = "SetupFiles" }
 }
 
 $solutionFiles = @{
-    "GetDBinfo.sql"         = $solutionFolder
-    "GetDatabases.ps1.txt"  = $solutionFolder
-    "AWProject.ssmssln"     = $projectFolder
-    "AWProject.ssmssqlproj" = $projectFolder
-    "BackupDB.sql"          = $projectFolder
+    "GetDBinfo.sql"         = @{ Local = $solutionFolder; Remote = "" }
+    "GetDatabases.ps1.txt"  = @{ Local = $solutionFolder; Remote = "" }
+    "AWProject.ssmssln"     = @{ Local = $projectFolder; Remote = "Solution/AWProject" }
+    "AWProject.ssmssqlproj" = @{ Local = $projectFolder; Remote = "Solution/AWProject" }
+    "BackupDB.sql"          = @{ Local = $projectFolder; Remote = "Solution/AWProject" }
 }
-
-# --- Determine what to download ---
-$filesToDownload = @{}
 
 switch ($installType) {
     "Setup Only" { 
@@ -54,11 +54,26 @@ switch ($installType) {
 
 # --- Download Execution ---
 foreach ($fileName in $filesToDownload.Keys) {
-    $sourceUrl = "$baseRepoUrl/$fileName"
-    $destinationPath = Join-Path $filesToDownload[$fileName] $fileName
+    $fileInfo = $filesToDownload[$fileName]
     
-    Write-Output "Downloading $fileName..."
-    Invoke-WebRequest -Uri $sourceUrl -OutFile $destinationPath -UseBasicParsing
+    # Construct the URL carefully
+    if ($fileInfo.Remote -ne "") {
+        $sourceUrl = "$baseRepoUrl/$($fileInfo.Remote)/$fileName"
+    }
+    else {
+        $sourceUrl = "$baseRepoUrl/$fileName"
+    }
+    
+    $destinationPath = Join-Path $fileInfo.Local $fileName
+    
+    Write-Output "Downloading from: $sourceUrl" # Debugging line
+    try {
+        Invoke-WebRequest -Uri $sourceUrl -OutFile $destinationPath -UseBasicParsing -ErrorAction Stop
+    }
+    catch {
+        Write-Error "Failed to download $fileName. Check if the URL is correct: $sourceUrl"
+        exit 1
+    }
 }
 
 # --- Post-Download Tweaks ---
