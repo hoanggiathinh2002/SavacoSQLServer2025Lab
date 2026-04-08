@@ -3,6 +3,11 @@ param (
     [string]$InstallType = "Full Lesson"
 )
 
+# Clean the input: Remove extra quotes and leading/trailing spaces
+$InstallType = $InstallType.Replace('"', '').Trim()
+
+Write-Output "DEBUG: Received InstallType value: '$InstallType'"
+
 $baseRepoUrl = "https://raw.githubusercontent.com/hoanggiathinh2002/SavacoSQLServer2025Lab/artifacts/sql-server-ssms/Artifacts/Lab01"
 $labRoot = "C:\SQLServerAdminLabs\LabFiles\Lab01"
 $solutionFolder = Join-Path $labRoot "Solution"
@@ -46,7 +51,7 @@ switch ($InstallType) {
         $filesToDownload = $setupFiles + $solutionFiles 
     }
     Default { 
-        Write-Error "Invalid InstallType specified."; exit 1 
+        Write-Error "Invalid InstallType specified: '$InstallType'"; exit 1
     }
 }
 
