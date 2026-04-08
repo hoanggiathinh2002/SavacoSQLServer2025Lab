@@ -1,0 +1,104 @@
+﻿Import-Module SQLServer -DisableNameChecking
+Invoke-Sqlcmd "DBCC FREEPROCCACHE;" -ServerInstance "MIA-SQL" -Database "InternetSales" -TrustServerCertificate  > $nul
+$startTime = Get-Date
+$endTime = $startTime.AddMinutes(3)
+$counter = 0
+
+$now = Get-Date
+
+Write-Host "Running database workload..."
+While ($now -le $endTime)
+{
+    $counter++
+
+    Invoke-Sqlcmd "
+                    SELECT c.FirstName + ' ' + c.LastName AS CustomerName, COUNT(d.OrderQty) AS ItemsOrdered
+	                FROM dbo.Customer c JOIN dbo.SalesOrderHeader o
+                    ON o.CustomerID = c.BusinessEntityID
+                    JOIN dbo.SalesOrderDetail d ON d.SalesOrderID = o.SalesOrderID
+                    GROUP BY c.FirstName + ' ' + c.LastName
+	                ORDER BY ItemsOrdered DESC;
+                  " -ServerInstance "MIA-SQL" -Database "InternetSales" -TrustServerCertificate  > $null
+
+    If ($counter % 2 -eq 0)
+    {
+        Invoke-Sqlcmd "
+                    SELECT c.Name AS Category, s.Name AS Subcategory, p.Name AS Product, p.ListPrice
+	                FROM dbo.Product p 	JOIN dbo.ProductSubcategory s
+	                ON p.ProductSubcategoryID = s.ProductSubcategoryID
+	                JOIN dbo.ProductCategory c
+	                ON s.ProductCategoryID = c.ProductCategoryID;
+                  " -ServerInstance "MIA-SQL" -Database "InternetSales" -TrustServerCertificate > $null
+
+       Invoke-Sqlcmd "
+                    SELECT YEAR(o.OrderDate) AS OrderYear, MONTH(o.OrderDate) AS OrderMonth,
+	                c.Name AS Category, s.Name AS SubCategory, p.Name AS Product,
+		            SUM(d.LineTotal) AS Revenue
+	                FROM dbo.SalesOrderHeader o JOIN dbo.SalesOrderDetail d
+	                ON d.SalesOrderID = o.SalesOrderID
+	                JOIN dbo.Product p ON d.ProductID = p.ProductID
+	                JOIN dbo.ProductSubcategory s
+	                ON p.ProductSubcategoryID = s.ProductSubcategoryID
+	                JOIN dbo.ProductCategory c
+	                ON s.ProductCategoryID = c.ProductCategoryID
+	                GROUP BY YEAR(o.OrderDate), MONTH(o.OrderDate), c.Name, s.Name, p.Name
+	                ORDER BY  YEAR(o.OrderDate), MONTH(o.OrderDate), c.Name, s.Name, p.Name;
+                  " -ServerInstance "MIA-SQL" -Database "InternetSales" -TrustServerCertificate > $null
+    }
+
+     If ($counter % 4 -eq 0)
+    {
+     
+       Invoke-Sqlcmd  "
+                    SELECT YEAR(o.OrderDate) AS OrderYear, MONTH(o.OrderDate) AS OrderMonth,
+	                c.Name AS Category, s.Name AS SubCategory, p.Name AS Product,
+		            SUM(d.LineTotal) AS Revenue
+	                FROM dbo.SalesOrderHeader o JOIN dbo.SalesOrderDetail d
+	                ON d.SalesOrderID = o.SalesOrderID
+	                JOIN dbo.Product p ON d.ProductID = p.ProductID
+	                JOIN dbo.ProductSubcategory s
+	                ON p.ProductSubcategoryID = s.ProductSubcategoryID
+	                JOIN dbo.ProductCategory c
+	                ON s.ProductCategoryID = c.ProductCategoryID
+	                GROUP BY YEAR(o.OrderDate), MONTH(o.OrderDate), c.Name, s.Name, p.Name
+	                ORDER BY  YEAR(o.OrderDate), MONTH(o.OrderDate), c.Name, s.Name, p.Name;
+                  " -ServerInstance "MIA-SQL" -Database "InternetSales" -TrustServerCertificate  > $null
+
+      Invoke-Sqlcmd "
+                    SELECT cu.CountryRegionName AS CountryRegion, cu.StateProvinceName AS StateProvince,  cu.City,
+					YEAR(o.OrderDate) AS OrderYear, MONTH(o.OrderDate) AS OrderMonth,
+		            SUM(d.LineTotal) AS Revenue
+	                FROM dbo.SalesOrderHeader o JOIN dbo.SalesOrderDetail d
+	                ON d.SalesOrderID = o.SalesOrderID
+					JOIN Customer cu ON o.CustomerID = cu.BusinessEntityID
+	                GROUP BY cu.CountryRegionName, cu.StateProvinceName, cu.City, YEAR(o.OrderDate), MONTH(o.OrderDate)
+	                ORDER BY  cu.CountryRegionName, cu.StateProvinceName, cu.City, YEAR(o.OrderDate), MONTH(o.OrderDate);
+                  " -ServerInstance "MIA-SQL" -Database "InternetSales" -TrustServerCertificate  > $null
+    }
+
+
+    If ($counter % 8 -eq 0)
+    {
+
+       Invoke-Sqlcmd "
+                    SELECT YEAR(o.OrderDate) AS OrderYear, MONTH(o.OrderDate) AS OrderMonth,
+					cu.CountryRegionName AS CountryRegion, cu.City,
+	                c.Name AS Category, s.Name AS SubCategory, p.Name AS Product,
+		            SUM(d.LineTotal) AS Revenue
+	                FROM dbo.SalesOrderHeader o WITH (TABLOCKX) JOIN dbo.SalesOrderDetail d
+	                ON d.SalesOrderID = o.SalesOrderID
+					JOIN Customer cu ON o.CustomerID = cu.BusinessEntityID
+	                JOIN dbo.Product p ON d.ProductID = p.ProductID
+	                JOIN dbo.ProductSubcategory s
+	                ON p.ProductSubcategoryID = s.ProductSubcategoryID
+	                JOIN dbo.ProductCategory c
+	                ON s.ProductCategoryID = c.ProductCategoryID
+	                GROUP BY YEAR(o.OrderDate), MONTH(o.OrderDate), cu.CountryRegionName, cu.City, c.Name, s.Name, p.Name
+	                ORDER BY  YEAR(o.OrderDate), MONTH(o.OrderDate), cu.CountryRegionName, cu.City, c.Name, s.Name, p.Name;
+                  " -ServerInstance "MIA-SQL" -Database "InternetSales" -TrustServerCertificate  > $null
+     
+    }
+
+    $now = Get-Date
+
+}

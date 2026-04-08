@@ -1,0 +1,65 @@
+Microsoft(R) Server Maintenance Utility (Unicode) Version 16.0.4115
+Report was generated on "MIA-SQL".
+Maintenance Plan: HumanResources Maintenance
+Duration: 00:00:01
+Status: Succeeded.
+Details:
+Check Database Integrity (MIA-SQL)
+Check Database integrity on Local server connection
+Databases: HumanResources
+Include indexes
+Physical only
+Task start: 2024-04-10T13:38:05.
+Task end: 2024-04-10T13:38:05.
+Success
+Command:DBCC CHECKDB(N''HumanResources'')  WITH  PHYSICAL_ONLY
+
+GO
+
+
+Reorganize Index (MIA-SQL)
+Reorganize index on Local server connection
+Databases: HumanResources
+Object: Tables and views
+Compact large objects
+Task start: 2024-04-10T13:38:06.
+Task end: 2024-04-10T13:38:06.
+Success
+Command:
+GO
+
+
+Update Statistics (MIA-SQL)
+Update Statistics on Local server connection
+Databases: HumanResources
+Object: Tables and views
+All existing statistics
+Task start: 2024-04-10T13:38:06.
+Task end: 2024-04-10T13:38:06.
+Success
+Command:use [HumanResources]
+GO
+UPDATE STATISTICS [Employees].[Employee] 
+WITH FULLSCAN
+GO
+use [HumanResources]
+GO
+UPDATE STATISTICS [Recruitment].[JobCandidate] 
+WITH FULLSCAN
+
+GO
+
+
+Back Up Database (Full) (MIA-SQL)
+Backup Database on Local server connection
+Databases: HumanResources
+Type: Full
+Append existing
+Task start: 2024-04-10T13:38:06.
+Task end: 2024-04-10T13:38:06.
+Success
+Command:BACKUP DATABASE [HumanResources] TO  DISK = N''C:\Backups\HumanResources_backup_2024_04_10_133806_2264312.bak'' WITH NOFORMAT, NOINIT,  NAME = N''HumanResources_backup_2024_04_10_133806_2264312'', SKIP, REWIND, NOUNLOAD,  STATS = 10
+
+GO
+
+
