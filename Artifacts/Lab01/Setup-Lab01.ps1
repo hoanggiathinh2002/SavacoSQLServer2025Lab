@@ -5,7 +5,7 @@ param (
 
 Write-Output "DEBUG: Received installType value: '$installType'"
 
-$baseRepoUrl = "https://raw.githubusercontent.com/hoanggiathinh2002/SavacoSQLServer2025Lab/artifacts/sql-server-ssms/Artifacts/Lab01"
+$baseRepoUrl = "https://raw.githubusercontent.com/hoanggiathinh2002/SavacoSQLServer2025Lab/main/Artifacts/Lab01"
 $labRoot = "C:\SQLServerAdminLabs\LabFiles\Lab01"
 $solutionFolder = Join-Path $labRoot "Solution"
 $projectFolder = Join-Path $solutionFolder "AWProject"
