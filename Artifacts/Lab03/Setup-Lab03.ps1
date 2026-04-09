@@ -75,8 +75,8 @@ foreach ($file in $filesToDownload) {
         $sourceUrl = "$baseRepoUrl/$fileName"
     }
     
-    # Encode spaces in URL (important for "Attach AWDataWarehouse.sql")
-    $sourceUrl = $sourceUrl -replace ' ', '%20'
+    # # Encode spaces in URL (important for "Attach AWDataWarehouse.sql")
+    # $sourceUrl = $sourceUrl -replace ' ', '%20'
     
     $destinationPath = Join-Path $file.Local $fileName
     
