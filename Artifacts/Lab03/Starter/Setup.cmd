@@ -16,7 +16,7 @@ NET START SQLAGENT$SQL2
 
 REM - Run SQL Script to prepare the database environment
 ECHO Configuring databases...
-SQLCMD -S local\SQL2 -E -i %SUBDIR%SetupFiles\Setup2.sql > NUL
+SQLCMD -S localhost\SQL2 -E -i %SUBDIR%SetupFiles\Setup2.sql > NUL
 SQLCMD -E -i %SUBDIR%SetupFiles\Setup.sql > NUL
 
 REM Create folders for database files
