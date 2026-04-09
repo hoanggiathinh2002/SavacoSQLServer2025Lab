@@ -68,7 +68,7 @@ foreach ($file in $filesToDownload) {
 
 # --- Handle Redundant Database Files via Local Copy (Faster & More Reliable) ---
 if ($installType -match "Setup|Full") {
-    $dbFiles = @("AWDataWarehouse_current.ndf", "AWDataWarehouse_archive.ndf", "AWDataWarehouse.mdf", "AWDataWarehouse.ldf")
+    $dbFiles = @("AWDataWarehouse.bak", "HumanResources.bak", "InternetSales.bak")
     foreach ($dbFile in $dbFiles) {
         $src = Join-Path $starterFolder $dbFile
         $dest = Join-Path $setupFilesFolder $dbFile
