@@ -27,5 +27,4 @@ MD C:\Data > NUL
 
 XCOPY %SUBDIR%SetupFiles\AWData*.* %SUBDIR% /Q /Y
 
-PAUSE
-
+ECHO Setup Complete.
