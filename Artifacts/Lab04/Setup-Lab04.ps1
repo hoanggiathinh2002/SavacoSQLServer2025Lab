@@ -52,8 +52,7 @@ switch ($installType) {
 foreach ($file in $filesToDownload) {
     $fileName = $file.Name
     # Properly encode spaces for URLs (e.g., "Attach AWDataWarehouse.sql" -> "Attach%20AWDataWarehouse.sql")
-    $encodedName = [uri]::EscapeDataString($fileName)
-    $sourceUrl = "$baseRepoUrl/$($file.Remote)/$encodedName"
+    $sourceUrl = "$baseRepoUrl/$($file.Remote)/$fileName"
     $destinationPath = Join-Path $file.Local $fileName
     
     Write-Output "Downloading: $fileName"
