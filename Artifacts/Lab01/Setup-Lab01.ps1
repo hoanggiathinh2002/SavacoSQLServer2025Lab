@@ -79,7 +79,6 @@ foreach ($fileName in $filesToDownload.Keys) {
 # --- Post-Download Tweaks ---
 # Rename the PowerShell text file to a functional script 
 $psTxtFile = Join-Path $solutionFolder "GetDatabases.ps1.txt"
-$psFile = Join-Path $solutionFolder "GetDatabases.ps1"
 if (Test-Path $psTxtFile) { Rename-Item -Path $psTxtFile -NewName "GetDatabases.ps1" -Force }
 
 # --- Execute Environment Setup (Only if Setup files were downloaded) ---
