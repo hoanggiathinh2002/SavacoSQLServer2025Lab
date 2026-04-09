@@ -42,11 +42,11 @@ $setupFiles = @(
     [PSCustomObject]@{ Name = "AWDataWarehouse.ldf"; Local = $setupFilesFolder; Remote = "Starter/Setupfiles" }
 )
 
-$solutionFiles = @{
-    "Attach AWDataWarehouse.sql" = @{ Local = $solutionFolder; Remote = "Solution" }
-    "Create HumanResource.sql"   = @{ Local = $solutionFolder; Remote = "Solution" }
-    "Create InternetSales.sql"   = @{ Local = $solutionFolder; Remote = "Solution" }
-}
+$solutionFiles = @(
+    [PSCustomObject]@{ Name = "Attach AWDataWarehouse.sql"; Local = $solutionFolder; Remote = "Solution" }
+    [PSCustomObject]@{ Name = "Create HumanResource.sql"; Local = $solutionFolder; Remote = "Solution" }
+    [PSCustomObject]@{ Name = "Create InternetSales.sql"; Local = $solutionFolder; Remote = "Solution" }
+)
 
 switch ($installType) {
     "Setup Only" { 
@@ -64,20 +64,23 @@ switch ($installType) {
 }
 
 # --- Download Execution ---
-foreach ($fileName in $filesToDownload.Keys) {
-    $fileInfo = $filesToDownload[$fileName]
+foreach ($file in $filesToDownload) {
+    $fileName = $file.Name
     
-    # Construct the URL carefully
-    if ($fileInfo.Remote -ne "") {
-        $sourceUrl = "$baseRepoUrl/$($fileInfo.Remote)/$fileName"
+    # Construct the URL: If Remote is provided, add it to path, otherwise just use base
+    if (![string]::IsNullOrEmpty($file.Remote)) {
+        $sourceUrl = "$baseRepoUrl/$($file.Remote)/$fileName"
     }
     else {
         $sourceUrl = "$baseRepoUrl/$fileName"
     }
     
-    $destinationPath = Join-Path $fileInfo.Local $fileName
+    # Encode spaces in URL (important for "Attach AWDataWarehouse.sql")
+    $sourceUrl = $sourceUrl -replace ' ', '%20'
     
-    Write-Output "Downloading from: $sourceUrl" # Debugging line
+    $destinationPath = Join-Path $file.Local $fileName
+    
+    Write-Output "Downloading: $fileName"
     try {
         Invoke-WebRequest -Uri $sourceUrl -OutFile $destinationPath -UseBasicParsing -ErrorAction Stop
     }
@@ -88,11 +91,15 @@ foreach ($fileName in $filesToDownload.Keys) {
 }
 
 
-# --- Execute Environment Setup (Only if Setup files were downloaded) ---
+# --- Execute Environment Setup ---
 if ($installType -eq "Setup Only" -or $installType -eq "Full Lesson") {
-    Set-Location $labRoot
-    Write-Output "Running environment setup..."
-    Start-Process -FilePath "cmd.exe" -ArgumentList "/c Setup.cmd" -Wait
+    # Check if Setup.cmd exists before running
+    $cmdPath = Join-Path $starterFolder "Setup.cmd"
+    if (Test-Path $cmdPath) {
+        Set-Location $starterFolder
+        Write-Output "Running environment setup..."
+        Start-Process -FilePath "cmd.exe" -ArgumentList "/c Setup.cmd" -Wait
+    }
 }
 
 Write-Output "Lesson 03 ($installType) Successfully Downloaded and Initialized."
