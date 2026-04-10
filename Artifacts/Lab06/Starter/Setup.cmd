@@ -8,12 +8,12 @@ REM - Restart SQL Server Service to force closure of any open connections
 ECHO Restarting SQL Server services...
 NET STOP SQLSERVERAGENT
 NET STOP MSSQLSERVER
-NET STOP SQLAGENT$SQL2
-NET STOP MSSQL$SQL2
+REM NET STOP SQLAGENT$SQL2
+REM NET STOP MSSQL$SQL2
 NET START MSSQLSERVER
-NET START MSSQL$SQL2
+REM NET START MSSQL$SQL2
 NET START SQLSERVERAGENT
-NET START SQLAGENT$SQL2
+REM NET START SQLAGENT$SQL2
 
 REM Create folders for database files
 ECHO Creating folders for database files (ignore errors if they already exist!)...
@@ -29,10 +29,11 @@ COPY %SUBDIR%SetupFiles\CurrencyRates.csv C:\CurrencyRates.csv /Y
 
 REM - Run SQL Script to prepare the database environment
 ECHO Configuring databases...
-SQLCMD -S .\SQL2 -E -i %SUBDIR%SetupFiles\Setup2.sql > NUL
-SQLCMD -E -i %SUBDIR%SetupFiles\Setup.sql 
+SQLCMD -S localhost -E -i %SUBDIR%SetupFiles\Setup2.sql -C > NUL 
 
-PAUSE
+SQLCMD -E -i %SUBDIR%SetupFiles\Setup.sql -C > NUL 
+
+ECHO Setup Complete. 
 
 
 
