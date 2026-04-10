@@ -58,5 +58,4 @@ if (Test-Path $cmdPath) {
     Set-Location (Split-Path $cmdPath)
     Start-Process -FilePath "cmd.exe" -ArgumentList "/c Setup.cmd" -Wait -NoNewWindow
 }
-
-Write-Output "Transfer Complete."
+Write-Host "`nSuccess: Lesson 07 ($installType) is updated and initialized!"
