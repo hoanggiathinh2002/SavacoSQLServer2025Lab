@@ -7,11 +7,11 @@ SET SUBDIR=%~dp0
 REM - Restart SQL Server Service
 NET STOP SQLSERVERAGENT
 NET STOP MSSQLSERVER
-NET STOP SQLAGENT$SQL2
-NET STOP MSSQL$SQL2
+REM NET STOP SQLAGENT$SQL2
+REM NET STOP MSSQL$SQL2
 NET START MSSQLSERVER
-NET START MSSQL$SQL2
-NET START SQLAGENT$SQL2
+REM NET START MSSQL$SQL2
+REM NET START SQLAGENT$SQL2
 
 REM Create folders for database files
 ECHO Creating folders for database files (ignore errors if they already exist!)...
@@ -23,8 +23,8 @@ DEL C:\Backups\*.* /Q > NUL
 
 REM - Run SQL Script to prepare the database environment
 ECHO Configuring databases...
-SQLCMD -S MIA-SQL\SQL2 -E -i %SUBDIR%SetupFiles\Setup2.sql > NUL
-SQLCMD -E -i %SUBDIR%SetupFiles\Setup.sql > NUL
+SQLCMD -S localhost -E -i %SUBDIR%SetupFiles\Setup2.sql -C > NUL
+SQLCMD -E -i %SUBDIR%SetupFiles\Setup.sql -C > NUL
 
 REM Sabotage AdventurWorks
 ECHO Sabotaging databases...
@@ -34,4 +34,4 @@ COPY %SUBDIR%SetupFiles\InternetSales.mdf.txt C:\Data\InternetSales.mdf /Y
 NET START MSSQLSERVER
 NET START SQLSERVERAGENT
 
-pause
+ECHO Setup Complete. 
