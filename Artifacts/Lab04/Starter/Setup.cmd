@@ -24,7 +24,7 @@ DEL C:\Backups\*.bak /Q > NUL
 
 REM - Run SQL Script to prepare the database environment
 ECHO Configuring databases...
-SQLCMD -S localhost -E -i %SUBDIR%SetupFiles\Setup2.sql -C > NUL
-SQLCMD -E -i %SUBDIR%SetupFiles\Setup.sql -C > NUL
+SQLCMD -S localhost -C -E -i %SUBDIR%SetupFiles\Setup2.sql > NUL
+SQLCMD -E -C -i %SUBDIR%SetupFiles\Setup.sql -C > NUL
 
 ECHO Setup Complete.
