@@ -13,7 +13,7 @@ NET START SQLSERVERAGENT
 
 REM - Run SQL Script to prepare the database environment
 ECHO Preparing Databases...
-SQLCMD -E -i "%SUBDIR%SetupFiles\Setup.sql" -C > NUL 
+SQLCMD -E -C -i "%SUBDIR%SetupFiles\Setup.sql" > NUL 
 
 ECHO Delete lab files (ignore errors if they don't exist!!!!!!)...
 DEL %SUBDIR%*.ps1 /Q /S
