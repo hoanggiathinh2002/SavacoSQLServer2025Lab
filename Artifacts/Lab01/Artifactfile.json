@@ -10,8 +10,8 @@
         "type": "string",
         "displayName": "Installation Type",
         "description": "Select what to deploy to the VM",
-        "allowedValues": ["Setup Only", "Solution Only", "Full Lesson"],
-        "defaultValue": "Full Lesson"
+        "allowedValues": ["Setup Only", "Solution Only", "Full Lab"],
+        "defaultValue": "Full Lab"
       }
     },
     "tags": [
