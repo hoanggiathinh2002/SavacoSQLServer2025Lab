@@ -1,6 +1,6 @@
 param (
     [Parameter(Mandatory = $false)]
-    [string]$installType = "Full Lesson"
+    [string]$installType = "Full Lab"
 )
 
 # --- Configuration ---

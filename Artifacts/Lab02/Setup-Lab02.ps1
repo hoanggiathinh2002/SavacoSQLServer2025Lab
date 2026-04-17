@@ -37,7 +37,7 @@ switch ($installType) {
     "Solution Only" { 
         $filesToDownload = $solutionFiles 
     }
-    "Full Lesson" { 
+    "Full Lab" { 
         $filesToDownload = $setupFiles + $solutionFiles 
     }
     Default { 
@@ -70,7 +70,7 @@ foreach ($fileName in $filesToDownload.Keys) {
 }
 
 # --- Execute Environment Setup (Only if Setup files were downloaded) ---
-if ($installType -eq "Setup Only" -or $installType -eq "Full Lesson") {
+if ($installType -eq "Setup Only" -or $installType -eq "Full Lab") {
     Set-Location $labRoot
     Write-Output "Running environment setup..."
     Start-Process -FilePath "cmd.exe" -ArgumentList "/c Setup.cmd" -Wait

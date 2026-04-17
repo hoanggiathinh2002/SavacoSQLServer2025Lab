@@ -44,7 +44,7 @@ $filesToDownload = @()
 switch ($installType) {
     "Setup Only" { $filesToDownload = $setupFiles }
     "Solution Only" { $filesToDownload = $solutionFiles }
-    "Full Lesson" { $filesToDownload = $setupFiles + $solutionFiles }
+    "Full Lab" { $filesToDownload = $setupFiles + $solutionFiles }
     Default { Write-Error "Invalid installType: '$installType'"; exit 1 }
 }
 
@@ -79,7 +79,7 @@ if ($installType -match "Setup|Full") {
 }
 
 # --- Execute Environment Setup ---
-if ($installType -eq "Setup Only" -or $installType -eq "Full Lesson") {
+if ($installType -eq "Setup Only" -or $installType -eq "Full Lab") {
     $cmdPath = Join-Path $starterFolder "Setup.cmd"
     if (Test-Path $cmdPath) {
         Write-Output "Running environment setup: $cmdPath"
