@@ -22,7 +22,7 @@ DEL %SUBDIR%*.ssmssln /Q /S
 DEL %SUBDIR%*.sql /Q
 RMDIR %SUBDIR%AWProject /S /Q
 
-PAUSE
+ECHO Setup Complete.
 
 
 
