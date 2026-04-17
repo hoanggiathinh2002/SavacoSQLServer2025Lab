@@ -4,4 +4,4 @@ ECHO Preparing the lab environment...
 MD C:\SQLTEST\Logs > NUL
 MD C:\SQLTEST\Data > NUL
 
-PAUSE
+ECHO Setup Complete.
