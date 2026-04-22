@@ -6,8 +6,8 @@ param (
 # --- Configuration ---
 $owner = "hoanggiathinh2002"
 $repo = "SavacoSQLServer2025Lab"
-$basePath = "Artifacts/Lab07"
-$localRoot = "C:\SQLServerAdminLabs\LabFiles\Lab07"
+$basePath = "Artifacts/Lab06"
+$localRoot = "C:\SQLServerAdminLabs\LabFiles\Lab06"
 
 # --- Function to Download Recursively ---
 function Get-GitHubFolder {
