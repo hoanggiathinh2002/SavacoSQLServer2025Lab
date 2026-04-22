@@ -36,7 +36,7 @@ $setupFiles = @(
 
 $solutionFiles = @(
     [PSCustomObject]@{ Name = "Attach AWDataWarehouse.sql"; Local = $solutionFolder; Remote = "Solution" }
-    [PSCustomObject]@{ Name = "Create HumanResource.sql"; Local = $solutionFolder; Remote = "Solution" }
+    [PSCustomObject]@{ Name = "Create HumanResources.sql"; Local = $solutionFolder; Remote = "Solution" }
     [PSCustomObject]@{ Name = "Create InternetSales.sql"; Local = $solutionFolder; Remote = "Solution" }
 )
 
