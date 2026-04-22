@@ -15,7 +15,9 @@
     "tags": [
     "SQL Server",
     "SSMS 2022",
-    "Lab"
+    "Lab",
+    "Tools",
+    "Switch Lab"
      ],
     "runCommand": {
      "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File Setup-SwitchLab.ps1 -installType')]"
