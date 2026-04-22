@@ -9,7 +9,7 @@
       "installType": {
         "type": "string",
         "displayName": "Installation Type",
-        "description": "Select what to deploy to the VM",
+        "description": "Select what to deploy to the VM"
       }
     },
     "tags": [
