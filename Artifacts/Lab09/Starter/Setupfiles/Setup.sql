@@ -27,27 +27,27 @@ BEGIN
 END
 GO
 
-IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'ADVENTUREWORKS\WebApplicationSvc')
+IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'SQLSERVERSSMS\WebApplicationSvc')
 BEGIN
-	DROP LOGIN [ADVENTUREWORKS\WebApplicationSvc];
+	DROP LOGIN [SQLSERVERSSMS\WebApplicationSvc];
 END
 GO
 
-IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'ADVENTUREWORKS\InternetSales_Users')
+IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'SQLSERVERSSMS\InternetSales_Users')
 BEGIN
-	DROP LOGIN [ADVENTUREWORKS\InternetSales_Users];
+	DROP LOGIN [SQLSERVERSSMS\InternetSales_Users];
 END
 GO
 
-IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'ADVENTUREWORKS\InternetSales_Managers')
+IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'SQLSERVERSSMS\IntSales_Managers')
 BEGIN
-	DROP LOGIN [ADVENTUREWORKS\InternetSales_Managers];
+	DROP LOGIN [SQLSERVERSSMS\IntSales_Managers];
 END
 GO
 
-IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'ADVENTUREWORKS\Database_Managers')
+IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'SQLSERVERSSMS\Database_Managers')
 BEGIN
-	DROP LOGIN [ADVENTUREWORKS\Database_Managers];
+	DROP LOGIN [SQLSERVERSSMS\Database_Managers];
 END
 GO
 
@@ -65,7 +65,7 @@ WITH
 	REPLACE;
 GO
 
-ALTER AUTHORIZATION ON DATABASE::HumanResources TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::HumanResources TO [SQLServerSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'HumanResources';
@@ -81,7 +81,7 @@ WITH
 	REPLACE;
 GO
 
-ALTER AUTHORIZATION ON DATABASE::InternetSales TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::InternetSales TO [SQLServerSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'InternetSales';
@@ -96,7 +96,7 @@ WITH
 	REPLACE;
 GO
 
-ALTER AUTHORIZATION ON DATABASE::AWDataWarehouse TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::AWDataWarehouse TO [SQLServerSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'AWDataWarehouse';
