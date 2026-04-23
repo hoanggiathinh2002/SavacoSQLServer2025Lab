@@ -66,5 +66,5 @@ GO
 -- View audited events
 SELECT event_time, action_id, succeeded, statement, user_defined_information, server_principal_name, database_name, schema_name, object_name
 FROM sys.fn_get_audit_file ('C:\SQLServerAdminLabs\Labfiles\Lab10\Starter\Audits\*',default,default)
-WHERE server_principal_name NOT IN ('ADVENTUREWORKS\u2uadmin', 'ADVENTUREWORKS\ServiceAcct');
+WHERE server_principal_name NOT IN ('SQLSERVERSSMS\Savaco', 'SQLSERVERSSMS\ServiceAcct');
 
