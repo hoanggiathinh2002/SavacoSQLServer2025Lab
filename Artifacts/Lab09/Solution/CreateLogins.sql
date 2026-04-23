@@ -2,25 +2,25 @@ USE master;
 GO
 
 -- Windows login for application DBAs group
-CREATE LOGIN [ADVENTUREWORKS\Database_Managers]
+CREATE LOGIN [SQLServerSSMS\Database_Managers]
 FROM WINDOWS 
 WITH DEFAULT_DATABASE = InternetSales;
 GO
 
 -- Windows login for e-commerce site service account
-CREATE LOGIN [ADVENTUREWORKS\WebApplicationSvc]
+CREATE LOGIN [SQLServerSSMS\WebApplicationSvc]
 FROM WINDOWS 
 WITH DEFAULT_DATABASE = InternetSales;
 GO
 
 -- Windows login for users group
-CREATE LOGIN [ADVENTUREWORKS\InternetSales_Users]
+CREATE LOGIN [SQLServerSSMS\InternetSales_Users]
 FROM WINDOWS 
 WITH DEFAULT_DATABASE = InternetSales;
 GO
 
 -- Windows login for managers group
-CREATE LOGIN [ADVENTUREWORKS\InternetSales_Managers]
+CREATE LOGIN [SQLServerSSMS\InternetSales_Managers]
 FROM WINDOWS 
 WITH DEFAULT_DATABASE = InternetSales;
 GO
