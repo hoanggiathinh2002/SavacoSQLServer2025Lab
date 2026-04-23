@@ -15,7 +15,7 @@ WITH
 	REPLACE;
 GO
 
-ALTER AUTHORIZATION ON DATABASE::HumanResources TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::HumanResources TO [SQLSERVERSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'HumanResources';
@@ -36,7 +36,7 @@ WITH
 	REPLACE;
 GO
 
-ALTER AUTHORIZATION ON DATABASE::InternetSales TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::InternetSales TO [SQLSERVERSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'InternetSales';
@@ -57,7 +57,7 @@ WITH
 	REPLACE;
 GO
 
-ALTER AUTHORIZATION ON DATABASE::AWDataWarehouse TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::AWDataWarehouse TO [SQLSERVERSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'AWDataWarehouse';
