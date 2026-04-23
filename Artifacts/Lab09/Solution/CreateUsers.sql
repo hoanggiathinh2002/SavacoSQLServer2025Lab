@@ -15,7 +15,7 @@ FOR LOGIN [SQLServerSSMS\InternetSales_Users]
 WITH DEFAULT_SCHEMA = Sales;
 
 CREATE USER InternetSales_Managers
-FOR LOGIN [SQLServerSSMS\InternetSales_Managers]
+FOR LOGIN [SQLServerSSMS\IntSales_Managers]
 WITH DEFAULT_SCHEMA = Sales;
 
 CREATE USER Database_Managers
