@@ -7,7 +7,7 @@ GO
 
 -- Add a login to the role
 ALTER SERVER ROLE application_admin
-ADD MEMBER [ADVENTUREWORKS\Database_Managers];
+ADD MEMBER [SQLServerSSMS\Database_Managers];
 GO
 
 -- Grant permission to manage application logins
