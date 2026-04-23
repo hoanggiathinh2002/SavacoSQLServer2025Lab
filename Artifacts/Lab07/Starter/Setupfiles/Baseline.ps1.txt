@@ -1,5 +1,5 @@
 ﻿Import-Module SQLServer -DisableNameChecking
-Invoke-Sqlcmd "DBCC FREEPROCCACHE;" -ServerInstance "MIA-SQL" -Database "InternetSales" -TrustServerCertificate > $nul
+Invoke-Sqlcmd "DBCC FREEPROCCACHE;" -ServerInstance "localhost" -Database "InternetSales" -TrustServerCertificate > $nul
 $startTime = Get-Date
 $endTime = $startTime.AddMinutes(3)
 $counter = 0
