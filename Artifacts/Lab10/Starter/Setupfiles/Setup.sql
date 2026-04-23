@@ -68,27 +68,27 @@ BEGIN
 END
 GO
 
-IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'ADVENTUREWORKS\WebApplicationSvc')
+IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'SQLSERVERSSMS\WebApplicationSvc')
 BEGIN
-	DROP LOGIN [ADVENTUREWORKS\WebApplicationSvc];
+	DROP LOGIN [SQLSERVERSSMS\WebApplicationSvc];
 END
 GO
 
-IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'ADVENTUREWORKS\InternetSales_Users')
+IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'SQLSERVERSSMS\InternetSales_Users')
 BEGIN
-	DROP LOGIN [ADVENTUREWORKS\InternetSales_Users];
+	DROP LOGIN [SQLSERVERSSMS\InternetSales_Users];
 END
 GO
 
-IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'ADVENTUREWORKS\InternetSales_Managers')
+IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'SQLSERVERSSMS\IntSales_Managers')
 BEGIN
-	DROP LOGIN [ADVENTUREWORKS\InternetSales_Managers];
+	DROP LOGIN [SQLSERVERSSMS\InternetSales_Managers];
 END
 GO
 
-IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'ADVENTUREWORKS\Database_Managers')
+IF EXISTS (SELECT * FROM sys.server_principals WHERE name = 'SQLSERVERSSMS\Database_Managers')
 BEGIN
-	DROP LOGIN [ADVENTUREWORKS\Database_Managers];
+	DROP LOGIN [SQLSERVERSSMS\Database_Managers];
 END
 GO
 
@@ -120,7 +120,7 @@ WITH
 	REPLACE;
 GO
 
-ALTER AUTHORIZATION ON DATABASE::HumanResources TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::HumanResources TO [SQLSERVERSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'HumanResources';
@@ -136,7 +136,7 @@ WITH
 	REPLACE;
 GO
 
-ALTER AUTHORIZATION ON DATABASE::InternetSales TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::InternetSales TO [SQLSERVERSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'InternetSales';
@@ -152,7 +152,7 @@ WITH
 	REPLACE;
 GO
 
-ALTER AUTHORIZATION ON DATABASE::AWDataWarehouse TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::AWDataWarehouse TO [SQLSERVERSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'AWDataWarehouse';
@@ -175,25 +175,25 @@ GO
 
 
 -- Windows login for application DBAs group
-CREATE LOGIN [ADVENTUREWORKS\Database_Managers]
+CREATE LOGIN [SQLSERVERSSMS\Database_Managers]
 FROM WINDOWS 
 WITH DEFAULT_DATABASE = InternetSales;
 GO
 
 -- Windows login for e-commerce site service account
-CREATE LOGIN [ADVENTUREWORKS\WebApplicationSvc]
+CREATE LOGIN [SQLSERVERSSMS\WebApplicationSvc]
 FROM WINDOWS 
 WITH DEFAULT_DATABASE = InternetSales;
 GO
 
 -- Windows login for users group
-CREATE LOGIN [ADVENTUREWORKS\InternetSales_Users]
+CREATE LOGIN [SQLSERVERSSMS\InternetSales_Users]
 FROM WINDOWS 
 WITH DEFAULT_DATABASE = InternetSales;
 GO
 
 -- Windows login for managers group
-CREATE LOGIN [ADVENTUREWORKS\InternetSales_Managers]
+CREATE LOGIN [SQLSERVERSSMS\IntSales_Managers]
 FROM WINDOWS 
 WITH DEFAULT_DATABASE = InternetSales;
 GO
@@ -211,7 +211,7 @@ GO
 
 -- Add a login to the role
 ALTER SERVER ROLE application_admin
-ADD MEMBER [ADVENTUREWORKS\Database_Managers];
+ADD MEMBER [SQLSERVERSSMS\Database_Managers];
 GO
 
 -- Grant permission to manage application logins
@@ -227,19 +227,19 @@ FOR LOGIN Marketing_Application
 WITH DEFAULT_SCHEMA = Customers;
 
 CREATE USER WebApplicationSvc
-FOR LOGIN [ADVENTUREWORKS\WebApplicationSvc]
+FOR LOGIN [SQLSERVERSSMS\WebApplicationSvc]
 WITH DEFAULT_SCHEMA = Sales;
 
 CREATE USER InternetSales_Users
-FOR LOGIN [ADVENTUREWORKS\InternetSales_Users]
+FOR LOGIN [SQLSERVERSSMS\InternetSales_Users]
 WITH DEFAULT_SCHEMA = Sales;
 
 CREATE USER InternetSales_Managers
-FOR LOGIN [ADVENTUREWORKS\InternetSales_Managers]
+FOR LOGIN [SQLSERVERSSMS\IntSales_Managers]
 WITH DEFAULT_SCHEMA = Sales;
 
 CREATE USER Database_Managers
-FOR LOGIN [ADVENTUREWORKS\Database_Managers]
+FOR LOGIN [SQLSERVERSSMS\Database_Managers]
 WITH DEFAULT_SCHEMA = dbo;
 
 -- Create user-defined database roles
@@ -257,22 +257,22 @@ ALTER ROLE sales_reader
 ADD MEMBER InternetSales_Users;
 
 ALTER ROLE sales_reader
-ADD MEMBER InternetSales_Managers;
+ADD MEMBER IntSales_Managers;
 
 ALTER ROLE sales_writer
-ADD MEMBER InternetSales_Managers;
+ADD MEMBER IntSales_Managers;
 
 ALTER ROLE customers_reader
 ADD MEMBER InternetSales_Users;
 
 ALTER ROLE customers_reader
-ADD MEMBER InternetSales_Managers;
+ADD MEMBER IntSales_Managers;
 
 ALTER ROLE customers_reader
 ADD MEMBER Marketing_Application;
 
 ALTER ROLE products_reader
-ADD MEMBER InternetSales_Managers;
+ADD MEMBER IntSales_Managers;
 
 ALTER ROLE products_reader
 ADD MEMBER Marketing_Application;
@@ -291,7 +291,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON Schema::Sales TO sales_admin;
 GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON Schema::Customers TO sales_admin;
 GRANT SELECT ON SCHEMA::Customers TO customers_reader;
 GRANT SELECT ON SCHEMA::Products TO products_reader;
-GRANT EXECUTE ON SCHEMA::Products TO InternetSales_Managers;
+GRANT EXECUTE ON SCHEMA::Products TO IntSales_Managers;
 GRANT INSERT ON Sales.SalesOrderHeader TO web_application;
 GRANT INSERT ON Sales.SalesOrderDetail TO web_application;
 GRANT SELECT ON Products.vProductCatalog TO web_customer;
