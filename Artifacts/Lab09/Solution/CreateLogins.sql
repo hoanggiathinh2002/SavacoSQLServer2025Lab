@@ -20,7 +20,7 @@ WITH DEFAULT_DATABASE = InternetSales;
 GO
 
 -- Windows login for managers group
-CREATE LOGIN [SQLServerSSMS\InternetSales_Managers]
+CREATE LOGIN [SQLServerSSMS\IntSales_Managers]
 FROM WINDOWS 
 WITH DEFAULT_DATABASE = InternetSales;
 GO
