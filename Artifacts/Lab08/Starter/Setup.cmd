@@ -23,7 +23,7 @@ MD C:\Backups > NUL
 
 REM - Run SQL Script to prepare the database environment
 ECHO Configuring databases...
-SQLCMD -S .\SQL2 -E -i %SUBDIR%SetupFiles\Setup2.sql -C > NUL
+SQLCMD -S .\SQLTEST -E -i %SUBDIR%SetupFiles\Setup2.sql -C > NUL
 SQLCMD -E -i %SUBDIR%SetupFiles\Setup.sql -C > NUL
 
 ECHO Removing lab files (ignore errors if they don't exist!)...
