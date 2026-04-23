@@ -37,7 +37,7 @@ WITH
 	REPLACE;
 GO
 
-ALTER AUTHORIZATION ON DATABASE::HumanResources TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::HumanResources TO [SQLSERVERSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'HumanResources';
@@ -47,7 +47,7 @@ RESTORE DATABASE [InternetSales] FROM  DISK = N'$(SUBDIR)SetupFiles\CorruptDB.ba
 MOVE 'Northwind' TO N'C:\Data\InternetSales.mdf',
 MOVE 'Northwind_Log' TO N'C:\Logs\InternetSales.ldf';
 
-ALTER AUTHORIZATION ON DATABASE::InternetSales TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::InternetSales TO [SQLSERVERSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'InternetSales';
@@ -63,7 +63,7 @@ WITH
 	REPLACE;
 GO
 
-ALTER AUTHORIZATION ON DATABASE::AWDataWarehouse TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::AWDataWarehouse TO [SQLSERVERSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'AWDataWarehouse';
@@ -99,7 +99,7 @@ SET NOCOUNT ON;
 DECLARE @Counter int = (SELECT MIN(BusinessEntityID) FROM HumanResources.Employees.Employee);
 DECLARE @maxEmp int = (SELECT MAX(BusinessEntityID) FROM HumanResources.Employees.Employee);
 WHILE @Counter <= @maxEmp BEGIN
-  UPDATE HumanResources.Employees.Employee SET EmailAddress = REPLACE(EmailAddress, 'adventure-works.com', 'adventureworks.msft')
+  UPDATE HumanResources.Employees.Employee SET EmailAddress = REPLACE(EmailAddress, 'SQLSERVERSSMS.com', 'SQLSERVERSSMS.msft')
     WHERE BusinessEntityID = @Counter;
   SET @Counter += 1;
 END;
