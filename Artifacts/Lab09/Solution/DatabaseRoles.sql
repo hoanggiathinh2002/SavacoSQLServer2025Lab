@@ -16,22 +16,22 @@ ALTER ROLE sales_reader
 ADD MEMBER InternetSales_Users;
 
 ALTER ROLE sales_reader
-ADD MEMBER InternetSales_Managers;
+ADD MEMBER IntSales_Managers;
 
 ALTER ROLE sales_writer
-ADD MEMBER InternetSales_Managers;
+ADD MEMBER IntSales_Managers;
 
 ALTER ROLE customers_reader
 ADD MEMBER InternetSales_Users;
 
 ALTER ROLE customers_reader
-ADD MEMBER InternetSales_Managers;
+ADD MEMBER IntSales_Managers;
 
 ALTER ROLE customers_reader
 ADD MEMBER Marketing_Application;
 
 ALTER ROLE products_reader
-ADD MEMBER InternetSales_Managers;
+ADD MEMBER IntSales_Managers;
 
 ALTER ROLE products_reader
 ADD MEMBER Marketing_Application;
