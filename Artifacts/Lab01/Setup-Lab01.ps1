@@ -6,8 +6,8 @@ param (
 # --- Configuration ---
 $owner = "hoanggiathinh2002"
 $repo = "SavacoSQLServer2025Lab"
-$basePath = "Artifacts/Lab1"
-$localRoot = "C:\SQLServerAdminLabs\LabFiles\Lab1"
+$basePath = "Artifacts/Lab01"
+$localRoot = "C:\SQLServerAdminLabs\LabFiles\Lab01"
 
 # --- Function to Download Recursively ---
 function Get-GitHubFolder {
@@ -58,4 +58,4 @@ Get-GitHubFolder -RepoPath $basePath -LocalPath $localRoot
 #     Set-Location (Split-Path $cmdPath)
 #     Start-Process -FilePath "cmd.exe" -ArgumentList "/c Setup.cmd" -Wait -NoNewWindow
 # }
-Write-Host "`nSuccess: Lesson 1 ($installType) is updated and initialized!"
+Write-Host "`nSuccess: Lab 01 ($installType) is updated and initialized!"

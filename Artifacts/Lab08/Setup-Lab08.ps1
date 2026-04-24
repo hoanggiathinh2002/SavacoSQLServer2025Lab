@@ -58,4 +58,4 @@ Get-GitHubFolder -RepoPath $basePath -LocalPath $localRoot
 #     Set-Location (Split-Path $cmdPath)
 #     Start-Process -FilePath "cmd.exe" -ArgumentList "/c Setup.cmd" -Wait -NoNewWindow
 # }
-Write-Host "`nSuccess: Lesson 08 ($installType) is updated and initialized!"
+Write-Host "`nSuccess: Lab 08 ($installType) is updated and initialized!"

@@ -100,4 +100,4 @@ if ($installType -eq "Setup Only" -or $installType -eq "Full Lab") {
     }
 }
 
-Write-Output "Lesson 05 ($installType) Successfully Downloaded and Initialized."
+Write-Output "Lab 05 ($installType) Successfully Downloaded and Initialized."

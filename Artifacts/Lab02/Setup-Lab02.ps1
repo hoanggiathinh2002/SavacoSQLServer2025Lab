@@ -76,4 +76,4 @@ if ($installType -eq "Setup Only" -or $installType -eq "Full Lab") {
     Start-Process -FilePath "cmd.exe" -ArgumentList "/c Setup.cmd" -Wait
 }
 
-Write-Output "Lesson 02 ($installType) Successfully Downloaded and Initialized."
+Write-Output "Lab 02 ($installType) Successfully Downloaded and Initialized."
