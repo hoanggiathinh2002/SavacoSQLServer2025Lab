@@ -1,0 +1,24 @@
+<Window x:Class="Lab_Controller.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Lab_Controller"
+        mc:Ignorable="d"
+        Title="SQL Lab Controller" Height="450" Width="342" Background="AliceBlue">
+
+    <Grid>
+        <StackPanel Margin="20" VerticalAlignment="Center" >
+            <TextBlock Text="Select Lab Number:" FontWeight="Bold" Margin="0,0,0,10"/>
+            <ComboBox x:Name="LabSelector" Margin="0,0,0,20" Width="286">
+            </ComboBox>
+            <Button x:Name="RunBtn" Content="Start Prepare Lab Environment" 
+                Padding="10" Click="RunBtn_Click" Background="LightBlue" Width="286"/>
+            <Button x:Name="TheoryBtn" Content="📖 Show Lab Theory / Instructions" 
+            Padding="10" Click="TheoryBtn_Click" Background="Yellow" Width="286"/>
+            <TextBlock x:Name="StatusText" Text="Ready" Margin="0,15,0,0" 
+                   Foreground="Gray" TextAlignment="Center" TextWrapping="Wrap"/>
+            <ProgressBar x:Name="WorkProgress" Height="10" Width="286" Margin="0,15,0,5" IsIndeterminate="False" Visibility="Hidden"/>
+        </StackPanel>
+    </Grid>
+</Window>
