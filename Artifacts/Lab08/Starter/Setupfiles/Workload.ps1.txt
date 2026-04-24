@@ -18,7 +18,7 @@ While ($now -le $endTime)
                     JOIN dbo.SalesOrderDetail d ON d.SalesOrderID = o.SalesOrderID
                     GROUP BY c.FirstName + ' ' + c.LastName
 	                ORDER BY ItemsOrdered DESC;
-                  " -ServerInstance "MIA-SQL" -Database "InternetSales" -TrustServerCertificate  > $null
+                  " -ServerInstance "localhost" -Database "InternetSales" -TrustServerCertificate  > $null
 
     If ($counter % 2 -eq 0)
     {
@@ -28,7 +28,7 @@ While ($now -le $endTime)
 	                ON p.ProductSubcategoryID = s.ProductSubcategoryID
 	                JOIN dbo.ProductCategory c
 	                ON s.ProductCategoryID = c.ProductCategoryID;
-                  " -ServerInstance "MIA-SQL" -Database "InternetSales" -TrustServerCertificate > $null
+                  " -ServerInstance "localhost" -Database "InternetSales" -TrustServerCertificate > $null
 
        Invoke-Sqlcmd "
                     SELECT YEAR(o.OrderDate) AS OrderYear, MONTH(o.OrderDate) AS OrderMonth,
@@ -43,7 +43,7 @@ While ($now -le $endTime)
 	                ON s.ProductCategoryID = c.ProductCategoryID
 	                GROUP BY YEAR(o.OrderDate), MONTH(o.OrderDate), c.Name, s.Name, p.Name
 	                ORDER BY  YEAR(o.OrderDate), MONTH(o.OrderDate), c.Name, s.Name, p.Name;
-                  " -ServerInstance "MIA-SQL" -Database "InternetSales" -TrustServerCertificate > $null
+                  " -ServerInstance "localhost" -Database "InternetSales" -TrustServerCertificate > $null
     }
 
      If ($counter % 4 -eq 0)
@@ -62,7 +62,7 @@ While ($now -le $endTime)
 	                ON s.ProductCategoryID = c.ProductCategoryID
 	                GROUP BY YEAR(o.OrderDate), MONTH(o.OrderDate), c.Name, s.Name, p.Name
 	                ORDER BY  YEAR(o.OrderDate), MONTH(o.OrderDate), c.Name, s.Name, p.Name;
-                  " -ServerInstance "MIA-SQL" -Database "InternetSales" -TrustServerCertificate  > $null
+                  " -ServerInstance "localhost -Database "InternetSales" -TrustServerCertificate  > $null
 
       Invoke-Sqlcmd "
                     SELECT cu.CountryRegionName AS CountryRegion, cu.StateProvinceName AS StateProvince,  cu.City,
@@ -73,7 +73,7 @@ While ($now -le $endTime)
 					JOIN Customer cu ON o.CustomerID = cu.BusinessEntityID
 	                GROUP BY cu.CountryRegionName, cu.StateProvinceName, cu.City, YEAR(o.OrderDate), MONTH(o.OrderDate)
 	                ORDER BY  cu.CountryRegionName, cu.StateProvinceName, cu.City, YEAR(o.OrderDate), MONTH(o.OrderDate);
-                  " -ServerInstance "MIA-SQL" -Database "InternetSales" -TrustServerCertificate  > $null
+                  " -ServerInstance "localhost" -Database "InternetSales" -TrustServerCertificate  > $null
     }
 
 
@@ -95,7 +95,7 @@ While ($now -le $endTime)
 	                ON s.ProductCategoryID = c.ProductCategoryID
 	                GROUP BY YEAR(o.OrderDate), MONTH(o.OrderDate), cu.CountryRegionName, cu.City, c.Name, s.Name, p.Name
 	                ORDER BY  YEAR(o.OrderDate), MONTH(o.OrderDate), cu.CountryRegionName, cu.City, c.Name, s.Name, p.Name;
-                  " -ServerInstance "MIA-SQL" -Database "InternetSales" -TrustServerCertificate  > $null
+                  " -ServerInstance "localhost" -Database "InternetSales" -TrustServerCertificate  > $null
      
     }
 
