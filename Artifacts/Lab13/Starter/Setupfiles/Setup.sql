@@ -29,7 +29,7 @@ WITH
 	REPLACE;
 GO
 
-ALTER AUTHORIZATION ON DATABASE::HumanResources TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::HumanResources TO [SQLSERVERSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'HumanResources';
@@ -45,7 +45,7 @@ WITH
 	REPLACE;
 GO
 
-ALTER AUTHORIZATION ON DATABASE::InternetSales TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::InternetSales TO [SQLSERVERSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'InternetSales';
@@ -61,7 +61,7 @@ WITH
 	REPLACE;
 GO
 
-ALTER AUTHORIZATION ON DATABASE::AWDataWarehouse TO [AdventureWorks\u2uadmin];
+ALTER AUTHORIZATION ON DATABASE::AWDataWarehouse TO [SQLSERVERSSMS\Savaco];
 GO
 
 EXEC  msdb.dbo.sp_delete_database_backuphistory @database_name = 'AWDataWarehouse';
@@ -103,7 +103,7 @@ GO
 
 
 --Reset multi-server jobs (in case students did the demo)
-EXECUTE msdb.dbo.sp_delete_targetserver @server_name = 'MIA-SQL\SQL2';
+EXECUTE msdb.dbo.sp_delete_targetserver @server_name = 'localhost\SQLTEST';
 
 IF EXISTS (select * from msdb.dbo.sysjobs WHERE name = N'Backup master database')
 EXEC msdb.dbo.sp_delete_job @job_name=N'Backup master database', @delete_unused_schedule=1
@@ -181,10 +181,10 @@ EXEC  msdb.dbo.sp_add_job @job_name=N'Back Up Database - InternetSales',
 		@notify_level_page=2, 
 		@delete_level=0, 
 		@category_name=N'[Uncategorized (Local)]', 
-		@owner_login_name=N'ADVENTUREWORKS\u2uadmin', @job_id = @jobId OUTPUT
+		@owner_login_name=N'SQLSERVERSSMS\Savaco', @job_id = @jobId OUTPUT
 select @jobId
 GO
-EXEC msdb.dbo.sp_add_jobserver @job_name=N'Back Up Database - InternetSales', @server_name = N'MIA-SQL'
+EXEC msdb.dbo.sp_add_jobserver @job_name=N'Back Up Database - InternetSales', @server_name = N'localhost'
 GO
 
 EXEC msdb.dbo.sp_add_jobstep @job_name=N'Back Up Database - InternetSales', @step_name=N'1', 
@@ -212,7 +212,7 @@ EXEC msdb.dbo.sp_update_job @job_name=N'Back Up Database - InternetSales',
 		@delete_level=0, 
 		@description=N'', 
 		@category_name=N'[Uncategorized (Local)]', 
-		@owner_login_name=N'ADVENTUREWORKS\u2uadmin', 
+		@owner_login_name=N'SQLSERVERSSMS\Savaco', 
 		@notify_email_operator_name=N'', 
 		@notify_netsend_operator_name=N'', 
 		@notify_page_operator_name=N''
@@ -227,10 +227,10 @@ EXEC  msdb.dbo.sp_add_job @job_name=N'Back Up Log - InternetSales',
 		@notify_level_page=2, 
 		@delete_level=0, 
 		@category_name=N'[Uncategorized (Local)]', 
-		@owner_login_name=N'ADVENTUREWORKS\u2uadmin', @job_id = @jobId OUTPUT
+		@owner_login_name=N'SQLSERVERSSMS\Savaco', @job_id = @jobId OUTPUT
 select @jobId
 GO
-EXEC msdb.dbo.sp_add_jobserver @job_name=N'Back Up Log - InternetSales', @server_name = N'MIA-SQL'
+EXEC msdb.dbo.sp_add_jobserver @job_name=N'Back Up Log - InternetSales', @server_name = N'localhost'
 GO
 
 EXEC msdb.dbo.sp_add_jobstep @job_name=N'Back Up Log - InternetSales', @step_name=N'1', 
@@ -258,7 +258,7 @@ EXEC msdb.dbo.sp_update_job @job_name=N'Back Up Log - InternetSales',
 		@delete_level=0, 
 		@description=N'', 
 		@category_name=N'[Uncategorized (Local)]', 
-		@owner_login_name=N'ADVENTUREWORKS\u2uadmin', 
+		@owner_login_name=N'SQLSERVERSSMS\Savaco', 
 		@notify_email_operator_name=N'', 
 		@notify_netsend_operator_name=N'', 
 		@notify_page_operator_name=N''
@@ -274,10 +274,10 @@ EXEC  msdb.dbo.sp_add_job @job_name=N'Back Up Database - HumanResources',
 		@notify_level_page=2, 
 		@delete_level=0, 
 		@category_name=N'[Uncategorized (Local)]', 
-		@owner_login_name=N'ADVENTUREWORKS\u2uadmin', @job_id = @jobId OUTPUT
+		@owner_login_name=N'SQLSERVERSSMS\Savaco', @job_id = @jobId OUTPUT
 select @jobId
 GO
-EXEC msdb.dbo.sp_add_jobserver @job_name=N'Back Up Database - HumanResources', @server_name = N'MIA-SQL'
+EXEC msdb.dbo.sp_add_jobserver @job_name=N'Back Up Database - HumanResources', @server_name = N'localhost'
 GO
 USE [msdb]
 GO
@@ -307,7 +307,7 @@ EXEC msdb.dbo.sp_update_job @job_name=N'Back Up Database - HumanResources',
 		@delete_level=0, 
 		@description=N'', 
 		@category_name=N'[Uncategorized (Local)]', 
-		@owner_login_name=N'ADVENTUREWORKS\u2uadmin', 
+		@owner_login_name=N'SQLSERVERSSMS\Savaco', 
 		@notify_email_operator_name=N'', 
 		@notify_netsend_operator_name=N'', 
 		@notify_page_operator_name=N''
@@ -322,10 +322,10 @@ EXEC  msdb.dbo.sp_add_job @job_name=N'Back Up Database - AWDataWarehouse',
 		@notify_level_page=2, 
 		@delete_level=0, 
 		@category_name=N'[Uncategorized (Local)]', 
-		@owner_login_name=N'ADVENTUREWORKS\u2uadmin', @job_id = @jobId OUTPUT
+		@owner_login_name=N'SQLSERVERSSMS\Savaco', @job_id = @jobId OUTPUT
 select @jobId
 GO
-EXEC msdb.dbo.sp_add_jobserver @job_name=N'Back Up Database - AWDataWarehouse', @server_name = N'MIA-SQL'
+EXEC msdb.dbo.sp_add_jobserver @job_name=N'Back Up Database - AWDataWarehouse', @server_name = N'localhost'
 GO
 
 EXEC msdb.dbo.sp_add_jobstep @job_name=N'Back Up Database - AWDataWarehouse', @step_name=N'1', 
@@ -353,7 +353,7 @@ EXEC msdb.dbo.sp_update_job @job_name=N'Back Up Database - AWDataWarehouse',
 		@delete_level=0, 
 		@description=N'', 
 		@category_name=N'[Uncategorized (Local)]', 
-		@owner_login_name=N'ADVENTUREWORKS\u2uadmin', 
+		@owner_login_name=N'SQLSERVERSSMS\Savaco', 
 		@notify_email_operator_name=N'', 
 		@notify_netsend_operator_name=N'', 
 		@notify_page_operator_name=N''
