@@ -53,9 +53,9 @@ Write-Output "Starting recursive download from GitHub..."
 Get-GitHubFolder -RepoPath $basePath -LocalPath $localRoot
 
 # --- Post-Download Logic ---
-$cmdPath = Join-Path $localRoot "Starter/Setup.cmd"
-if (Test-Path $cmdPath) {
-    Set-Location (Split-Path $cmdPath)
-    Start-Process -FilePath "cmd.exe" -ArgumentList "/c Setup.cmd" -Wait -NoNewWindow
-}
+# $cmdPath = Join-Path $localRoot "Starter/Setup.cmd"
+# if (Test-Path $cmdPath) {
+#     Set-Location (Split-Path $cmdPath)
+#     Start-Process -FilePath "cmd.exe" -ArgumentList "/c Setup.cmd" -Wait -NoNewWindow
+# }
 Write-Host "`nSuccess: Lesson 13 ($installType) is updated and initialized!"
