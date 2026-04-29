@@ -5,20 +5,51 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Lab_Controller"
         mc:Ignorable="d"
-        Title="SQL Lab Controller" Height="450" Width="342" Background="AliceBlue">
+        Title="SQL Lab Controller"
+        Height="450"
+        Width="342"
+        Background="AliceBlue">
 
     <Grid>
-        <StackPanel Margin="20" VerticalAlignment="Center" >
-            <TextBlock Text="Select Lab Number:" FontWeight="Bold" Margin="0,0,0,10"/>
-            <ComboBox x:Name="LabSelector" Margin="0,0,0,20" Width="286">
+        <StackPanel Margin="20"
+                VerticalAlignment="Center">
+            <TextBlock Text="Select Lab Number:"
+                    FontWeight="Bold"
+                    Margin="0,0,0,10"/>
+            <ComboBox x:Name="LabSelector"
+                    Margin="0,0,0,20"
+                    Width="286">
             </ComboBox>
-            <Button x:Name="RunBtn" Content="Start Prepare Lab Environment" 
-                Padding="10" Click="RunBtn_Click" Background="LightBlue" Width="286"/>
-            <Button x:Name="TheoryBtn" Content="📖 Show Lab Theory / Instructions" 
-            Padding="10" Click="TheoryBtn_Click" Background="Yellow" Width="286"/>
-            <TextBlock x:Name="StatusText" Text="Ready" Margin="0,15,0,0" 
-                   Foreground="Gray" TextAlignment="Center" TextWrapping="Wrap"/>
-            <ProgressBar x:Name="WorkProgress" Height="10" Width="286" Margin="0,15,0,5" IsIndeterminate="False" Visibility="Hidden"/>
+            <Button x:Name="RunBtn"
+                    Content="Start Prepare Lab Environment"
+                    Padding="10"
+                    Click="RunBtn_Click"
+                    Background="LightBlue"
+                    Width="286"/>
+            <Button x:Name="TheoryBtn"
+                    Content="📖 Show Lab Theory"
+                    Padding="10"
+                    Click="TheoryBtn_Click"
+                    Background="Yellow"
+                    Width="286"/>
+            <Button x:Name="InstructionBtn"
+                    Content="📖 Show Lab Instructions"
+                    Padding="10"
+                    Click="InstructionBtn_Click"
+                    Background="Honeydew"
+                    Width="286"/>
+            <TextBlock x:Name="StatusText"
+                    Text="Ready"
+                    Margin="0,15,0,0"
+                       Foreground="Gray"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap"/>
+            <ProgressBar x:Name="WorkProgress"
+                    Height="10"
+                    Width="286"
+                    Margin="0,15,0,5"
+                    IsIndeterminate="False"
+                    Visibility="Hidden"/>
         </StackPanel>
     </Grid>
 </Window>
