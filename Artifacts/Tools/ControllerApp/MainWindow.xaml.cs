@@ -1,44 +1,44 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Azure;
+using Azure.Core;
+using Azure.Identity;
+using Azure.ResourceManager;
+using Azure.ResourceManager.DevTestLabs;
+using Azure.ResourceManager.DevTestLabs.Models;
 using Path = System.IO.Path;
 
 namespace Lab_Controller
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public class LabItem
     {
         public string ID { get; set; }     // Used for paths (e.g., "07")
-        public string Name { get; set; }   // Used for display (e.g., "Lab 07: Monitoring SQL Server")
-
-        public override string ToString() => Name; // What shows in the ComboBox
+        public string Name { get; set; }   // Used for display
+        public override string ToString() => Name;
     }
+
     public partial class MainWindow : Window
     {
+        // --- AZURE CONFIGURATION ---
+        // Replace these with your actual Azure portal values
+        private const string SubscriptionId = "2ee7d06c-c16c-480f-80c4-9be21dee2330";
+        private const string ResourceGroupName = "rg-thinh";
+        private const string LabName = "SQL-Server-Lab-2025";
+        private const string VirtualMachineName = "SQLServerLab02";
+        // ---------------------------
+
         public MainWindow()
         {
             InitializeComponent();
             LoadLabs();
         }
+
         private void LoadLabs()
         {
-            // Add your labs here: ID is for folders, Name is for the user
-            LabSelector.Items.Add(new LabItem { ID = "01", Name = "Lab 01: Introduction to SQL Server Database Administration" });
+            LabSelector.Items.Add(new LabItem { ID = "01", Name = "Lab 01: Introduction to SQL Server" });
             LabSelector.Items.Add(new LabItem { ID = "02", Name = "Lab 02: Installing and Configuring SQL Server" });
             LabSelector.Items.Add(new LabItem { ID = "03", Name = "Lab 03: Working with Databases and Storage" });
             LabSelector.Items.Add(new LabItem { ID = "04", Name = "Lab 04: Planning and Implementing a Backup Strategy" });
@@ -48,67 +48,81 @@ namespace Lab_Controller
             LabSelector.Items.Add(new LabItem { ID = "08", Name = "Lab 08: Tracing SQL Server Activity" });
             LabSelector.Items.Add(new LabItem { ID = "09", Name = "Lab 09: Managing SQL Server Security" });
             LabSelector.Items.Add(new LabItem { ID = "10", Name = "Lab 10: Auditing Data Access and Encrypting Data" });
-            LabSelector.Items.Add(new LabItem { ID = "11", Name = "Lab 11: Performing Ongoing Database Maintenance " });
+            LabSelector.Items.Add(new LabItem { ID = "11", Name = "Lab 11: Performing Ongoing Database Maintenance" });
             LabSelector.Items.Add(new LabItem { ID = "12", Name = "Lab 12: Automating SQL Server Management" });
-            LabSelector.Items.Add(new LabItem { ID = "13", Name = "Lab 13: Monitoring SQL Server with Notifications and Alerts" });
+            LabSelector.Items.Add(new LabItem { ID = "13", Name = "Lab 13: Monitoring SQL Server with Notifications" });
             LabSelector.SelectedIndex = 0;
         }
 
         private async void RunBtn_Click(object sender, RoutedEventArgs e)
         {
             var selectedLab = (LabItem)LabSelector.SelectedItem;
+            if (selectedLab == null) return;
 
-            // UI Updates
+            // UI Lockdown
             RunBtn.IsEnabled = false;
             WorkProgress.IsIndeterminate = true;
             WorkProgress.Visibility = Visibility.Visible;
-            StatusText.Text = $"Configuring {selectedLab.Name}...";
 
-            await Task.Run(() => SetupLab(selectedLab));
+            try
+            {
+                // STEP 1: Local Configuration
+                StatusText.Text = $"Running local setup for {selectedLab.Name}...";
+                await Task.Run(() => SetupLab(selectedLab));
 
-            // Completion
-            WorkProgress.IsIndeterminate = false;
-            WorkProgress.Visibility = Visibility.Hidden;
-            StatusText.Text = $"[SUCCESS] {selectedLab.Name} is now active.";
-            RunBtn.IsEnabled = true;
+                // STEP 2: Azure Artifact Trigger
+                StatusText.Text = "Connecting to Azure to apply artifacts...";
+                await ApplyAzureArtifactAsync(selectedLab.ID);
+
+                StatusText.Text = $"[SUCCESS] {selectedLab.Name} is fully configured.";
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = "[ERROR] Setup failed.";
+                MessageBox.Show($"An error occurred: {ex.Message}", "Process Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                WorkProgress.IsIndeterminate = false;
+                WorkProgress.Visibility = Visibility.Hidden;
+                RunBtn.IsEnabled = true;
+            }
         }
-        private void TheoryBtn_Click(object sender, RoutedEventArgs e)
+
+        private async Task ApplyAzureArtifactAsync(string labId)
         {
-            var selectedLab = (LabItem)LabSelector.SelectedItem;
-            if (selectedLab == null) return;
+            // DefaultAzureCredential picks up VS, Azure CLI, or Environment logins
+            var client = new ArmClient(new DefaultAzureCredential());
 
-            // Define where your theory files are located. 
-            // Example: C:\SQLServerAdminLabs\Labfiles\Lab01\Theory.pdf
-            string theoryPath = $@"C:\SQLServerAdminLabs\Labfiles\Lab{selectedLab.ID}\Theory.pdf";
+            // Construct the Resource ID for the VM
+            ResourceIdentifier vmResourceId = DevTestLabVmResource.CreateResourceIdentifier(
+                SubscriptionId, ResourceGroupName, LabName, VirtualMachineName);
 
-            if (File.Exists(theoryPath))
+            DevTestLabVmResource labVm = client.GetDevTestLabVmResource(vmResourceId);
+
+            var content = new DevTestLabVmApplyArtifactsContent();
+
+            // Configure the artifact details. 
+            // NOTE: Ensure the ArtifactId matches the name in your Azure Lab Repository
+            var artifactInstallDetails = new DevTestLabArtifactInstallInfo()
             {
-                try
-                {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = theoryPath,
-                        UseShellExecute = true // This tells Windows to open it with the default PDF reader
-                    });
-                    StatusText.Text = "Opening theory document...";
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Could not open theory file: {ex.Message}");
-                }
-            }
-            else
-            {
-                MessageBox.Show($"Theory document not found at: {theoryPath}", "File Missing");
-            }
+                //ArtifactId = $"Lab{labId}-Artifact" // Example: "Lab07-Artifact"
+                ArtifactId = $"/subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/providers/Microsoft.DevTestLab/labs/{LabName}/artifactSources/public repo/artifacts/Lab{labId}-Artifact"
+            };
+
+
+            content.Artifacts.Add(artifactInstallDetails);
+
+            // Start the Azure Operation (LRO - Long Running Operation)
+            ArmOperation operation = await labVm.ApplyArtifactsAsync(WaitUntil.Completed, content);
         }
+
         private void SetupLab(LabItem lab)
         {
-            // PATHS use the ID (e.g., "07")
             string labPath = $@"C:\SQLServerAdminLabs\Labfiles\Lab{lab.ID}\Starter";
             string bgDir = @"C:\SQLServerAdminLabs\Tools\BGInfo";
 
-            // 1. Update BGInfo with the full Name (e.g., "Lab 07: Monitoring SQL Server")
+            // 1. Update BGInfo
             File.WriteAllText(Path.Combine(bgDir, "CurrentLab.txt"), lab.Name);
 
             // 2. Stop Services
@@ -126,7 +140,7 @@ namespace Lab_Controller
             RunCommand("net", "start MSSQLSERVER");
             RunCommand("sqlcmd", "-S localhost -E -i \"C:\\SQLServerAdminLabs\\Tools\\DeepClean.sql\"");
 
-            // 5. Run Setup using the ID-based path
+            // 5. Run Setup.cmd
             string setupFile = Path.Combine(labPath, "Setup.cmd");
             if (File.Exists(setupFile))
             {
@@ -148,6 +162,40 @@ namespace Lab_Controller
         {
             var psi = new ProcessStartInfo(cmd, args) { CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden };
             Process.Start(psi)?.WaitForExit();
+        }
+
+        private void TheoryBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedLab = (LabItem)LabSelector.SelectedItem;
+            if (selectedLab == null) return;
+
+            string theoryPath = $@"C:\SQLServerAdminLabs\Labfiles\Lab{selectedLab.ID}\Theory.pdf";
+
+            if (File.Exists(theoryPath))
+            {
+                Process.Start(new ProcessStartInfo { FileName = theoryPath, UseShellExecute = true });
+            }
+            else
+            {
+                MessageBox.Show($"File missing: {theoryPath}");
+            }
+        }
+
+        private void InstructionBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedLab = (LabItem)LabSelector.SelectedItem;
+            if (selectedLab == null) return;
+
+            string instructionPath = $@"C:\SQLServerAdminLabs\Labfiles\Lab{selectedLab.ID}\Instruction.pdf";
+
+            if (File.Exists(instructionPath))
+            {
+                Process.Start(new ProcessStartInfo { FileName = instructionPath, UseShellExecute = true });
+            }
+            else
+            {
+                MessageBox.Show($"File missing: {instructionPath}");
+            }
         }
     }
 }
